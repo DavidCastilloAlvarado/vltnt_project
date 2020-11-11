@@ -1,0 +1,3 @@
+# Avoid write credential every time (do it just one time)
+git config credential.helper store
+git push origin master 
