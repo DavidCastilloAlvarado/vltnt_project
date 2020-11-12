@@ -11,7 +11,7 @@ import json
 class control_robot(object):
     # serial_busy: Lista de numeros de seriales y ocupados
     # name : Nombre del dispositivo a buscar
-    # default_response: Es un diccionario
+    # default_response: Es un diccionario con las llaves de telemetría seteadas para responder ante el error
     def __init__(self, serial_busy, name_robot,default_response, baudrate=115200, cant_intentos= 30):
         self.name = name_robot
         self.busys = serial_busy
