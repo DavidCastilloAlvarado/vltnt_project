@@ -15,7 +15,7 @@ except:
 app = Flask(__name__)
 #read_ino = serial_arduino()
 
-@app.route('/datos')
+@app.route('/datos',, methods=['GET'])
 def datos():
 	try:
 	    dataframe = pandas.read_csv("lecturas_ino.csv", delim_whitespace=True, header=None)
