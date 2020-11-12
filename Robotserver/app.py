@@ -1,55 +1,55 @@
 #!/usr/bin/env python
-import os
 import json
-import pandas
-import _thread
-from flask import Flask, render_template, Response
-#from ino_read import serial_arduino , get_json_ino
-from com_arduino import read_ino
-# Iniciando el buffer de lecturas de sensor y server de control de movimiento
-try:
-   _thread.start_new_thread(read_ino,())
-except:
-   print ("Error: unable to start thread")
-#####
+import jsonpickle
+from flask import Flask, render_template, Response,request
+from control_serial import control_robot
+
+# Inicializamos los dos robots esclavos
+default_chassis = {"status":"wait"}
+default_arm     = {"status":"wait"}
+chassis_robot = control_robot(serial_busy=[], 
+                                name_robot="arm", 
+                                default_response=default_arm,)
+arm_robot     = control_robot(serial_busy=[chassis_robot.serial_number], 
+                                name_robot="car", 
+                                default_response=default_chassis,)
+# Initialize the Flask application
 app = Flask(__name__)
-#read_ino = serial_arduino()
 
-@app.route('/datos',, methods=['GET'])
-def datos():
-	try:
-	    dataframe = pandas.read_csv("lecturas_ino.csv", delim_whitespace=True, header=None)
-	    dataset = dataframe.values
-	    ang_x = dataset[-1,0]
-	    ang_y = dataset[-1,1]
-	    dist = dataset[-1,2]
-	    status_dir1 = dataset[-1,3] 
-	    status_dir2 = dataset[-1,4]
+@app.route('/datos/<robot>', methods=['GET'])
+def telemetry(robot):
+    global chassis_robot
+    global arm_robot
 
-	    angX= "Ang x= "+str(ang_x) 
-	    angY= "Ang y= "+str(ang_y) 
-	    distM= str(dist)+" cm"
+    if robot == "arm":
+        data_json = arm_robot.get_telemetry_data()
+    elif robot == "car":
+        data_json = chassis_robot.get_telemetry_data()
 
-	    sensor_json = {'st1': status_dir1, 'dist': distM, 'ang_y': angY, 'st2': status_dir2, 'ang_x': angX}
-	except:
-		sensor_json = {'st1': 'wait', 'dist': 'wait', 'ang_y': 'wait', 'st2': 'wait', 'ang_x': 'wait'}
-	msg_json = json.dumps(sensor_json)
-	return Response(msg_json)
+    data_json = json.dumps(data_json)
+    return Response(data_json)
 
+@app.route('/datos/<robot>', methods=['POST'])
+def control(robot):
+    global chassis_robot
+    global arm_robot
+    # Recibiendo datos desde el frontend
+    raw = request.data
+    send_str = raw.decode('utf8').replace("'", '"')
+    comand = json.loads(send_str)
+
+    if robot == "arm":
+        ctrl_resp = arm_robot.control_device(data=comand)
+    elif robot == "car":
+        ctrl_resp = chassis_robot.control_device(data=comand)
+    
+    response = {'message': 'Control {} delivered: {}'.format(robot, ctrl_resp)
+                }
+    # Codifica la respuesta using jsonpickle
+    response_pickled = jsonpickle.encode(response)
+    return Response(response=response_pickled, status=200, mimetype="application/json")
 
 if __name__ == '__main__':
     port = 8010
-    print("Servidor de telemetría   http://127.0.1.0:"+str(port))
+    print("Servidor de telemetría   http://localhost:"+str(port))
     app.run(host='0.0.0.0' ,port=port, threaded=True)
-
-    """
-    $.ajax({
-        url: 'http://127.0.1.0:8080/datos',
-        type: 'GET',
-        dataType: "json",
-        success: displayAll
-    });
-    function displayAll(data){
-        console.log(data);
-    }
-    """
