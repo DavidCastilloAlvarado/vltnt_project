@@ -18,19 +18,12 @@ import json
 
 class control_robot(object):
     """ 
-    Envia: RQN0 solicita nombre, RQN1, solicita telemetría <p>
-
-    Control: {"MV": [key1,key2,key3, ... keyN]}<p>
-
-    default_response: {"signal1":xyz, "signal2":xyz, ...}<p>
-
-    serial_busy: Lista de numeros de seriales y ocupados<br>
-
+    Envia: RQN0 solicita nombre, RQN1, solicita telemetría \n
+    Control: {"MV": [key1,key2,key3, ... keyN]}\n
+    default_response: {"signal1":xyz, "signal2":xyz, ...}\n
+    serial_busy: Lista de numeros de seriales y ocupados\n
     name : Nombre del dispositivo a buscar. 
-
-    default_response: Es un diccionario con las llaves de telemetría seteadas para responder ante el error
-    
-
+    default_response: Es un diccionario con las llaves de telemetría seteadas para responder ante el error\n
     """
     def __init__(self, serial_busy, name_robot,default_response,control_format,trans_func= lambda x:x, baudrate=115200, cant_intentos= 30, timeout_read=0.05):
         self.name = name_robot
@@ -46,8 +39,8 @@ class control_robot(object):
     @staticmethod
     def _request_robot(option):
         """
-        O :  obtener el nombte
-        1 :  obtener telemetría
+        O :  obtener el nombte\n
+        1 :  obtener telemetría\n
         """
         comand = "RQN"+str(option)+'\n' # PREFIJO PARA QUE EL ROBOT RECONOZCA QUE ES UNA ORDEN DE MOVIMIENTO
         send_comand = str.encode(comand)
@@ -109,9 +102,9 @@ class control_robot(object):
 
     def get_telemetry_data(self):
         """
-        Función que devuelve la información que envía el robot esclavo
-        Devuelve los datos de telemetria obtenidos, en caso de falla devuelve los datos 
-        por defecto.
+        Función que devuelve la información que envía el robot esclavo\n
+        Devuelve los datos de telemetria obtenidos, en caso de falla devuelve los datos \n
+        por defecto.\n
         """
         try:
             self._writeSerial2Robot(self._request_robot(1))
@@ -125,10 +118,10 @@ class control_robot(object):
 
     def control_device(self, data):
         """
-        Función que envia comandos hacia el robot
-        data : es un diccionario.
-        Devuelve valor verdadero cuando se recibio correctamente el comando,
-        caso contrario el Falso.
+        Función que envia comandos hacia el robot\n
+        data : es un diccionario.\n
+        Devuelve valor verdadero cuando se recibio correctamente el comando,\n
+        caso contrario el Falso.\n
         """
         try:
             self._writeSerial2Robot(data)
