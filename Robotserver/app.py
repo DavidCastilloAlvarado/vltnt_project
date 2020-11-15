@@ -49,7 +49,6 @@ def control(robot):
         comand = WebJson2InoJson(comand,arm_robot)
         ctrl_resp = arm_robot.control_device(data=comand)
     elif robot == "car":
-        # TODO: Convertir las entradas JSON del frontend a comandos de direcion para el arduino
         comand = WebJson2InoJson(comand,chassis_robot)
         ctrl_resp = chassis_robot.control_device(data=comand)
     

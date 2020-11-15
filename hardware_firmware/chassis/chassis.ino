@@ -2,11 +2,39 @@
  * sin embargo el del brazo robótico si lo neecesita, ademas de que necesita tener
  * un contador de pasos totales acumulados dentro de la memoria eeprom.
  * **/
+#include "I2Cdev.h"
+#include "MPU6050.h"
+#include "Wire.h"
+#include "math.h"
 #include <avr/wdt.h>
 
 String inData;
 String data_send;
-String buffer;
+/*--------------------------MPU 6050---------------------------------*/
+// La dirección del MPU6050 puede ser 0x68 o 0x69, dependiendo 
+// del estado de AD0. Si no se especifica, 0x68 estará implicito
+MPU6050 sensor_ang;
+// Valores RAW (sin procesar) del acelerometro y giroscopio en los ejes x,y,z
+bool started_sensor = false;
+int ax, ay, az;
+int gx, gy, gz;
+double  ang_x, ang_y;
+float ang_x_prev = 0; 
+float ang_y_prev = 0;
+long tiempo_prev;
+float dt;
+/*---------------------------HC RC04---------------------------------*/
+const int Trigger = A0;   //Pin digital 2 para el Trigger del sensor
+const int Echo    = A1;   //Pin digital 3 para el Echo del sensor
+long t;                  //timpo que demora en llegar el eco
+long dist_obst;          //distancia en centimetros
+long d_max = 150; // distancia maxima detectada
+int sum_d = 0;
+int i = 0;
+int j = 0;
+int dis_val[5]={0,0,0,0,0}; //pos[0,1,2,3,4] 
+long time_out;
+
 /*---------------------------Control de Motor------------------------*/
 //                           M1     M2  COnfiguracion de Pines L298N
 int IN1[2] ={13,8};       // 13     8
@@ -21,7 +49,7 @@ String Status_speed="";
 
 
 void send_telemetry(){
-  data_send = String("{")+String("'ang_x':") + String(10) + String(",") + String("'ang_y':") + String(10) + String(",") + String("'dist':") + String(10) + String(",")+ String("'DIR':") + Status_dir + String(",")+ String("'SP':") + Status_speed + String("}");
+  data_send = String("{")+String("'ang_x':") + String(int(ang_x_prev)) + String(",") + String("'ang_y':") + String(int(ang_y_prev)) + String(",") + String("'dist':") + String(int(dist_obst)) + String(",")+ String("'DIR':") + Status_dir + String(",")+ String("'SP':") + Status_speed + String("}");
   Serial.println(data_send);
 }
 
@@ -43,7 +71,6 @@ void robot_move(String &inData){
   time_run_prev = millis();
   Motor_action(DIR,SPEED);
 }
-
 
 void serialEvent(){
   //while(Serial.available() ){
@@ -70,11 +97,17 @@ void setup() {
   Serial.setTimeout(50);
   inData.reserve(100);
   data_send.reserve(100);
+  init_Motor_control();
+  init_MPU_sensor(); 
+  init_HC_RC04();
+
   wdt_enable(WDTO_1S);     // Iniciando el WDT
 }
 
 void loop() {
   stop_motor_time_run();
+  MPU_sensor();
+  HC_RC04();
   // put your main code here, to run repeatedly:
   wdt_reset();
 }
@@ -155,4 +188,81 @@ void Motor_action(int direct,int pwmS ){
         Status_speed = "0";
         break;
   }
+}
+
+void init_MPU_sensor(){
+  Wire.begin();           //Iniciando I2C  
+  sensor_ang.initialize();    //Iniciando el sensor_ang
+  if (sensor_ang.testConnection()) {
+    started_sensor= true;
+    }
+  else{
+    started_sensor= false;
+  }
+}
+
+void init_HC_RC04(){
+  pinMode(Trigger, OUTPUT); //pin como salida
+  pinMode(Echo, INPUT);  //pin como entrada
+  digitalWrite(Trigger, LOW);//Inicializamos el pin con 0
+  time_out = d_max*58.823;
+}
+
+void MPU_sensor(){
+  if (started_sensor){
+    // Leer las aceleraciones y velocidades angulares
+    sensor_ang.getAcceleration(&ax, &ay, &az);
+    sensor_ang.getRotation(&gx, &gy, &gz);
+    // Correxion de Offsets
+    ax=ax-1277;
+    ay=ay+428;
+    az=az+1723;
+    gx=gx+637;
+    gy=gy-319;
+    gz=gz-224;
+    dt = (millis()-tiempo_prev)/1000.0;
+    tiempo_prev=millis();
+    
+    //Calcular los ángulos con acelerometro
+    float accel_ang_x=atan2(ay,sqrt(pow(ax,2) + pow(az,2)))*(180.0/3.14);
+    float accel_ang_y=atan2(-ax,sqrt(pow(ay,2) + pow(az,2)))*(180.0/3.14);
+    
+    //Calcular angulo de rotación con giroscopio y filtro complementario  
+    ang_x = 0.98*(ang_x_prev+(gx/127)*dt) + 0.02*accel_ang_x;
+    ang_y = 0.98*(ang_y_prev+(gy/160)*dt) + 0.02*accel_ang_y;
+    
+    ang_x_prev=ang_x;
+    ang_y_prev=ang_y;
+  }
+}
+
+void HC_RC04(){
+  digitalWrite(Trigger, HIGH);
+  delayMicroseconds(10);      //Enviamos un pulso de 10us
+  digitalWrite(Trigger, LOW);
+  
+  t = pulseIn(Echo, HIGH,time_out );    //obtenemos el ancho del pulso
+  if (t == 0 ){ 
+    dist_obst = d_max; // Tiempo mayor al esperado =  más distancia Dmáx
+  } 
+  else{
+    dist_obst = t/58.823;       // Distancia en centimetros
+  } 
+  
+  if (i <5){                  // Acumulamos 5 lecturas 
+    dis_val[i] = dist_obst;   // para sacar la media
+    i++;
+  }
+  if (i == 5){
+    for (j = 0; j < 5; j++){  // calcula el promedio de mediciones
+      sum_d += dis_val[j];
+      dist_obst=sum_d/5;
+    }
+    for (j = 0; j < 4; j++){  // Desplaza los valores dentro del array
+      dis_val[j] = dis_val[j+1]; 
+    } 
+    i--;
+    sum_d = 0;
+  }
+  if (dist_obst > d_max ){ dist_obst = d_max; }
 }
