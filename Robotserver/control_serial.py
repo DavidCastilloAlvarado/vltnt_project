@@ -22,7 +22,7 @@ class control_robot(object):
     Control: {"MV": [key1,key2,key3, ... keyN]}\n
     default_response: {"signal1":xyz, "signal2":xyz, ...}\n
     serial_busy: Lista de numeros de seriales y ocupados\n
-    name : Nombre del dispositivo a buscar. 
+    name : Nombre del dispositivo a buscar. \n
     default_response: Es un diccionario con las llaves de telemetría seteadas para responder ante el error\n
     """
     def __init__(self, serial_busy, name_robot,default_response,control_format,trans_func= lambda x:x, baudrate=115200, cant_intentos= 30, timeout_read=0.05):

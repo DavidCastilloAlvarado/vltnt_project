@@ -20,7 +20,6 @@
 #include "Wire.h"
 #include "math.h"
 #include <avr/wdt.h>
-
 String inData;
 String data_send;
 /*--------------------------MPU 6050---------------------------------*/
