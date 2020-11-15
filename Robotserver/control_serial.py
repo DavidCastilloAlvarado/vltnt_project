@@ -1,3 +1,11 @@
+"""
+AUTO: Bach. David Rolando Castillo Alvarado
+TEMA: Clase creada para inicializar los puertos seriales según el nombre especifico del robot,
+enviar comandos de control al robot y recibir datos de telemetría del robot.
+FUNCIONALIDAD: Se reliza la conección con los robor mediante puerto serial, el sistema tiene proteccion
+contra desconexión, en caso sucediera, esta intentará reconetarse inmediatamente. sin la encesidad de
+reiniciar ninguno de los dos equipos, ni el computador principal ni el robot esclavo.
+"""
 import serial
 import time
 import json

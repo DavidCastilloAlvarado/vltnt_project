@@ -1,27 +1,23 @@
+"""
+AUTO: Bach. David Rolando Castillo Alvarado
+TEMA: Funciones creadas para  formatear los comandos de control provenientes del servidor web
+a un formato legible por el robot.
+"""
 import json
 
 def WebJson2InoJson(json_incoming, robot_serial):
     """
-    La entrada robot_serial es un objeto de clase "control_robot"
-
-    # ARM
-    input WEBJSON
-
-    +-X, +-Z, +-gripper_rotate, +-gripper_open_close, cam_yaw, cam_pitch 
-
-    Output
-
-    A, B ,C, D, P, R
-
-    # CAR
-
-    input
-
-    DIRECCION, VELOCIDAD
-
-    Output
-
-    D, S
+    La entrada robot_serial es un objeto de clase "control_robot" \n
+    # ARM\n
+    input WEBJSON\n
+    +-X, +-Z, +-gripper_rotate, +-gripper_open_close, cam_yaw, cam_pitch \n
+    Output\n
+    A, B ,C, D, P, R\n
+    # CAR\n
+    input\n
+    DIRECCION, VELOCIDAD\n
+    Output\n
+    D, S\n
     """
     robot_name            = robot_serial.name
     json_format_outcoming = robot_serial.control_format
@@ -29,9 +25,7 @@ def WebJson2InoJson(json_incoming, robot_serial):
         assert len(json_incoming) == len(json_format_outcoming), "Dimensión incorrecta de los datos de entrada con los de salida - car"
         for key_in, key_out in zip(json_incoming, json_format_outcoming):
             json_format_outcoming[key_out] = string2number(json_incoming[key_in])
-
         return json_format_outcoming
-
     elif robot_name == "arm":
         # input WEBJSON
         # +-X, +-Z, +-gripper_rotate, +-gripper_open_close, cam_yaw, cam_pitch 

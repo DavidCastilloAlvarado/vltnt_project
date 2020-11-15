@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+"""
+AUTO: Bach. David Rolando Castillo Alvarado
+TEMA: servidor para el API REST que controlará las funcionalidades del robot, este API REST
+tendrá comunicación con el servidor de aplicación de la pagina web de la interface de 
+usuario.
+FUNCIONALIDAD: Se cuenta con dos funciones, una para entregar telemetría y otro para proporcionar control
+a los dos robots declarados al inicio, el chassis y el arm. Cada uno de estos de declara usando una 
+clase especialmente diseñada para este proposito, abrir puertos seriales 
+usando nombres especificos con ordenes personalizadas.
+"""
 import json
 import jsonpickle
 from flask import Flask, render_template, Response,request
