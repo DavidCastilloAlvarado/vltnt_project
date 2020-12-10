@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+    <head>
+        <meta charset="UTF-8">
+        <!-- <title>VLTNT-Robot</title> -->
+        <style>
+            #container {
+                display: flex;
+                flex-flow: row nowrap;
+                align-items: flex-end;
+            }
+            video {
+                background: #eee none repeat scroll 0 0;
+                border: 1px solid #aaa;
+            }
+            .overlayWrapper {
+                position: relative;
+            }
+            .overlayWrapper.overlay {
+                position: absolute;
+                top: 0;
+                left: 5px;
+            }
+            p {
+                margin: 0.125em;
+            }
+            small {
+                font-size: smaller;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 class= "text-center">
+            <span>Vehículo Terrestre Liviano no Tripulado</span>
+        </h1>
+        <center>
+            <input type="text" readonly="readonly" id="data_ino" size="40" title="Datos recibidos del chassis">
+            <input type="text" readonly="readonly" id="data_arm" size="40" title="Datos recibidos del manipulador">
+            <br>
+            <br>
+        <div class="card p-3 mx-4">
+            <div class="card-body">
+                <div id="container">
+                    <div class="overlayWrapper">
+                        <video id="remote-video" autoplay="" width="640" height="480" style="display: none" > 
+                    <!-- <video id="remote-video" width="640" height="480" style="display: none" > -->
+                            Your browser does not support the video tag.
+                        </video>
+                        <p class="overlay"></p>
+                    </div>
+                    <canvas id='c' width="640" height="480"  ></canvas>
+                    <canvas id='c2' width="640" height="480" ></canvas>  
+                </div>
+            </div>
+        </div>
+
+        </center>
+
+        <div class="card p-3 mx-4" id="buttonsControl">
+            <div class="card-body">
+                <div id="controls">
+                <center>
+                    <button type=button id="pause" class="btn btn-danger" onclick="pause();" title="Pausar o continuar la transmisión">Pausar/Resumir</button>
+                    <button type=button id="mute" class="btn btn-warning"  onclick="mute();" title="Silenciar/Des silenciar">Mute/Unmute</button>
+                    <button type=button id="fullscreen"  class="btn btn-info" onclick="fullscreen();">Pantalla completa</button>
+                    <button type=button id="record" class="btn btn-primary" onclick="start_stop_record();" title="Iniciar o parar la grabación audio/video">Iniciar Grabación</button>
+                </center>
+                </div>
+            </div>
+        </div>
+
+        <fieldset>
+            <div class="card p-3 mx-4" id= "Opcionesdevideo">
+                <div class="card-body">
+            
+                    <legend><b>Opciones del Video Remoto</b></legend>
+                    <div>
+                        <div>
+                        <span>Video:</span>
+                        <label><input type="checkbox" onclick="remote_hw_vcodec_selection();"  id="remote_hw_vcodec" name="remote_hw_vcodec" value="remote_hw_vcodec" title="Forzar la codificación por hardware, si está permitido"> Forzar la codificación por hardware </label>
+                        
+                        </div>
+                        <select class="form-select form-select-lg mb-3"  id="remote_vformat"  name="remote_vformat" onclick="remote_hw_vcodec_format_selection();" title="Resoluciones y FPS disponibles">
+                            <option value="5">320x240 15 fps</option>
+                            <option value="10">320x240 30 fps</option>
+                            <option value="20">352x288 30 fps</option>
+                            <option value="25">640x480 15 fps</option>
+                            <option value="30">640x480 30 fps</option>
+                            <option value="35">800x480 30 fps</option>
+                            <option value="40">960x720 30 fps</option>
+                            <option value="50">1024x768 30 fps</option>
+                            <option value="55">1280x720 15 fps</option>
+                            <option value="60" selected="selected">1280x720 30 fps, kbps min.800 max.4000 start1200</option>
+                            <option value="63">1280x720 60 fps</option>
+                            <option value="65">1280x768 15 fps</option>
+                            <option value="70">1280x768 30 fps</option>
+                            <option value="80">1280x960 30 fps</option>
+                            <option value="90">1600x768 30 fps</option>
+                            <option value="95">1640x1232 15 fps</option>
+                            <option value="97">1640x1232 30 fps</option>
+                            <option value="100">1920x1080 15 fps</option>
+                            <option value="105">1920x1080 30 fps</option>
+                        </select>
+                        
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="card p-3 mx-4" id= "Grabaciónaudiovideo">
+            <div class="card-body">
+                <div>
+                    <details id="record-detail">
+                        <summary><b>Grabar Audio/Video streaming</b></summary>
+                        <br>
+                        <div>
+                            <div class="overlayWrapper">
+                                <video id="recorded-video" controls>
+                                    Su navegador no soporta la etiqueta de vídeo.
+                                </video>
+                                <p class="overlay">Grabación</p>
+                            </div>
+                        </div>
+                        <div>
+                            <p><small>NOTA: En versiones antiguas de Chrome el video puede salir corrupto, probar Firefox en tal caso </small></p>
+                            <button type=button id="discard" class="btn btn-warning"  onclick="discard_recording();" title="Descartar grabación audio/video">Descartar</button>
+                            <button type=button id="download" class="btn btn-danger" onclick="download();" title="Guardar grabación audio/video">Guardar como</button>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-3 mx-4" id="telemetría">
+            <div class="card-body">
+                <div>
+                    <details open>
+                        <summary><b>Telemetría y control</b></summary>
+                        <br>
+                        <fieldset id="datachannels" disabled>
+                            <!-- <span>message: </span><input type="text" id="datamessage" value="" title="message to send to the remote peer"/> -->
+                            <p><small>NOTE: Es necesario activar el CORS en el buscardor (Cross Origin Resource Sharing) para permitir la telemetría </small></p>
+                            <button id="datasend" class="btn btn-success" onclick="read_data();" title="Optiene los datos de telemetría" >Iniciar Comunicación</button>
+                            <label><input type="checkbox" onclick="keypresssend_selection();" id="keypresssend" name="keypresssend" title="Comando de control de Movimiento, permite el control de las ruedas y del brazo robótico">Comando de control de Movimiento</label>
+                        </fieldset>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-3 mx-4" id= "inforaspiserver">
+            <div class="card-body">
+                <div id="commands">
+                    <details>
+                        <summary><b>Robot IP Address</b></summary>
+                        <br>
+                        <fieldset>
+                            <span>Remote Peer/Signalling Server Address: </span><input required type="text" id="signalling_server" value="192.168.0.102:9000" title="<host>:<port>, default address is autodetected"/><br>
+                        </fieldset>
+                    </details>
+                    <br><br>
+                    <center>
+                    
+                    <button id="start" class="btn btn-success btn-lg" onclick="start();">Iniciar VLTNT</button>
+                    <button disabled id="stop" class="btn btn-danger btn-lg"  onclick="stop();">Parar</button>
+                    </center>
+                </div>
+                
+            </div>
+        </div>
+
+        <br><br><br><br>
+          
+    </body>
+</html>

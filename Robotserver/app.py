@@ -72,12 +72,15 @@ def control(robot):
 
 @app.route("/")
 def home():
-    ctx = { "time": 1234}
-    return render_template("index.html",contexto = ctx)
+    return render_template("index.html")
 
 @app.route("/info")
 def info():
     return render_template("info.html")
+
+@app.route("/vltnt")
+def vltnt():
+    return render_template("controlpanel.html")
 
 if __name__ == '__main__':
     port = 8010
