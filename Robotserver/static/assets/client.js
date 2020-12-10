@@ -1,13 +1,10 @@
 ip_global = location.hostname// Ip del servidor (raspi)
-port_global = 9000          // Port del servidor webRTC(raspi)
+port_webrtc = 9000          // Port del servidor webRTC(raspi)
 const video = document.getElementById('remote-video');
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 
 var signalling_server_hostname = location.hostname || ip_global;
-//var signalling_server_address = signalling_server_hostname + ':' + (location.port || (location.protocol === 'https:' ? 443 : 80));
-//var isFirefox = typeof InstallTrigger !== 'undefined';// Firefox 1.0+
-
 var ws = null;
 var pc;
 var datachannel;
@@ -20,9 +17,6 @@ var pcConfig = {
 };
 var pcOptions = {
     optional: [
-        // Deprecated:
-        //{RtpDataChannels: false},
-        //{DtlsSrtpKeyAgreement: true}
     ]
 };
 var mediaConstraints = {
@@ -62,33 +56,7 @@ function createPeerConnection() {
         console.error("createPeerConnection() failed");
     }
 }
-/**
-function onDataChannel(event) {
-    console.log("onDataChannel()");
-    datachannel = event.channel;
 
-    event.channel.onopen = function () {
-        console.log("Data Channel is open!");
-        document.getElementById('datachannels').disabled = false;
-
-    };
-
-    event.channel.onerror = function (error) {
-        console.error("Data Channel Error:", error);
-    };
-
-    event.channel.onmessage = function (event) {
-        console.log("Got Data Channel Message:", event.data);
-        document.getElementById('datareceived').value = event.data;
-    };
-
-    event.channel.onclose = function () {
-        datachannel = null;
-        document.getElementById('datachannels').disabled = true;
-        console.log("The Data Channel is Closed");
-    };
-}
-**/
 function onIceCandidate(event) {
     if (event.candidate) {
         var candidate = {
@@ -135,8 +103,6 @@ function onTrack(event) {
     var playPromise = remoteVideoElement.play();
     if (playPromise !== undefined) {
         playPromise.then(_ => {
-            // Automatic playback started!
-            // Show playing UI.
             console.log("Reproduciendo")
             document.getElementById('datachannels').disabled = false
         })
@@ -160,16 +126,12 @@ function start() {
         document.documentElement.style.cursor = 'wait';
 
         var protocol = location.protocol === "https:" ? "wss:" : "ws:";
-        ws = new WebSocket(protocol + '//' + ip_global + ":" + port_global + '/stream/webrtc');
+        ws = new WebSocket(protocol + '//' + ip_global + ":" + port_webrtc + '/stream/webrtc');
 
         function call(stream) {
             iceCandidates = [];
             remoteDesc = false;
             createPeerConnection();
-            /**
-            if (stream) {
-                pc.addStream(stream);
-            }**/
             var request = {
                 what: "call",
                 options: {
@@ -281,8 +243,6 @@ function start() {
             alert("An error has occurred!");
             ws.close();
         };
-
-
 
     } else {
         alert("Sorry, this browser does not support WebSockets.");
@@ -547,11 +507,12 @@ function unselect_remote_hw_vcodec() {
 }
 
 function requestAnimationFrame2(callback) {
-    return setTimeout(callback, 100);
+    return setTimeout(callback, 1000);
 };
 var sended = 0;
 function send_control(data_send, dest) {
-    url_ = 'http://' + ip_global + ':8050/' + dest
+    // url_ = 'http://' + ip_global + ':8010/control/' + dest
+    url_ = location.origin +'/control/' + dest
     $.ajax({
         type: "POST",
         url: url_,
@@ -560,7 +521,7 @@ function send_control(data_send, dest) {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (data) {
-            document.getElementById('data_arm').value = data['message'];
+            document.getElementById('control_resp').value = data['message'];
             sended = 0;
         },
         failure: function (errMsg) {
@@ -576,13 +537,13 @@ function message(dir, speed) {
     if (+new Date - time_ > 200 && sended == 0) {
         if (speed == -1) {
             console.log(dir);
-            var move_data = { 'orden_user': dir };
+            var move_data = { 'order': dir };
             send_control(move_data, 'arm');
         }
         else {
             console.log(dir);
-            var move_data = { 'FBLR': dir, 'sp': speed };
-            send_control(move_data, 'control');
+            var move_data = { 'D': dir, 'S': speed };
+            send_control(move_data, 'car');
         }
         time_ = +new Date
         sended = 1
@@ -598,29 +559,29 @@ function keydown(e) {
     e.stopImmediatePropagation();
     //keys[e.keyCode] = e.keyCode;
     //clearTimeout(time_out);
-
-    if (event.keyCode == 38) {
+    // Teclas para controlar el movimiento del carro
+    if (event.keyCode == 38) {  // fecha hacia arriva
         return message(1, speed);
 
     }
-    else if (event.keyCode == 40) {
+    else if (event.keyCode == 40) { // flecha hacia abajo
         return message(2, speed);
 
     }
-    else if (event.keyCode == 39) {
+    else if (event.keyCode == 39) { // flecha hacia la derecha
         return message(3, speed);
 
     }
-    else if (event.keyCode == 37) {
+    else if (event.keyCode == 37) { // flecha hacia la izquierda
         return message(4, speed);
 
     }
-    else if (event.keyCode == 107) {
+    else if (event.keyCode == 187) { // tecla de suma, en el  cuerpo del teclado
         speed = speed + 1;
         if (speed > 9) { speed = 9 };
 
     }
-    else if (event.keyCode == 109) {
+    else if (event.keyCode == 189) { // tecla de resta, en el cuerpo del teclado
         speed = speed - 1;
         if (speed < 0) { speed = 0 };
 
@@ -675,19 +636,19 @@ function keydown(e) {
 
     }
     // FIn de comandos para la camara
-    else if (event.keyCode == 187) { //== aumenta dp
-        return message("sm", -1);
+    else if (event.keyCode == 188) { //coma(,) aumenta dp, diferencial de movimiento del robot.
+        return message("sm", -1);                 
 
     }
-    else if (event.keyCode == 189) { // -- disminuye el dp
+    else if (event.keyCode == 190) { //punto(.) -- disminuye el dp
         return message("rt", -1);
 
     }
-    else if (event.keyCode == 219) { // [ abre gripper
+    else if (event.keyCode == 79) { // o  abre gripper
         return message("op", -1);
 
     }
-    else if (event.keyCode == 221) { // ] cierra griper
+    else if (event.keyCode == 80) { // p cierra griper
         return message("cl", -1);
 
     }
@@ -719,18 +680,18 @@ window.onbeforeunload = function () { // Detiene la comunicación antes de cerra
     }
 };
 
-
 function read_data() {
-    document.getElementById('datasend').disabled = true;
+    document.getElementById('readdata').disabled = true;
     try {
         $.ajax({
-            url: 'http://' + ip_global + ':8010/datos', // Es la dirección en donde se encuentra ejecutando el servidor, el cual es distinta a la dirección del WEBRTC (En caso de alojado en el raspi, el IP debe corresponder al IP del raspi)
+            // url: 'http://' + ip_global + ':8010/datos', // Es la dirección en donde se encuentra ejecutando el servidor, el cual es distinta a la dirección del WEBRTC (En caso de alojado en el raspi, el IP debe corresponder al IP del raspi)
+            url: location.origin + '/datos/'+'car',
             type: 'GET',
             dataType: "json",
             success: displayAll
         });
         function displayAll(data) {
-            document.getElementById('data_ino').value = data.ang_x + " " + data.ang_y + "    " + data.dist + " " + data.st1 + " " + data.st2;
+            document.getElementById('telem_robot').value = data.ang_x + " " + data.ang_y f//+ "    " + data.dist + " " + data.st1 + " " + data.st2;
         }
     } catch (e) {
         console.error(e);
@@ -752,161 +713,10 @@ video.addEventListener('play', function () {
         ctx.drawImage(video, 0, 0, w, h);
         ctx.fillStyle = "black";
         ctx.font = "20px Arial";
-        var text = document.getElementById('data_ino').value
-        var text2 = document.getElementById('data_arm').value
+        var text = document.getElementById('telem_robot').value
+        var text2 = document.getElementById('control_resp').value
         ctx.strokeText(text, 20, 20);
         ctx.strokeText(text2, 20, h - 20);
 
     }, 33);
 }, false);
-
-//////////////////////////////////////////////////////////////////////////////
-
-var keep_call = 0;
-function keep_prediction() {
-    if (keep_call == 0) {
-        keep_call = 1
-    } else {
-        keep_call = 0
-    }
-
-}
-
-function stop_mv() {
-    play = 0
-    window.cancelAnimationFrame(animat);
-}
-
-function play_mv() {
-    if (play == 0 && ready == 1) {
-        play = 1;
-        run(model);
-    } else {
-        alert("No se puede inicial o ya iniciado")
-    }
-}
-
-async function run(model) {
-    let mod;
-    mod = model;
-    /**
-        const MODEL_URL = "{{ url_for('static',filename='web_model/tensorflowjs_model.pb') }}";
-        const WEIGHTS_URL = "{{ url_for('static',filename='web_model/weights_manifest.json') }}";
-              // en el ejemplo de stackoverflow esta la extension para desactivar el cors
-        play = 0
-        ready = 0
-
-
-        try{
-            //tf.setBackend('webgl',true);
-            const model = await tf.loadFrozenModel(MODEL_URL, WEIGHTS_URL);
-            document.getElementById('clickMe').style.display = 'block';
-            document.getElementById('clickMe2').style.display = 'block';
-            alert("Modelo Cargado")
-            ready = 1
-
-        }catch(e){
-            console.error(e);
-            alert("Error al cargar el Modelo")
-        }
-    **/
-    let vid;
-    vid = document.getElementById('remote-video');
-
-    predicboxes(vid, mod);
-
-}
-
-var animat;
-function predicboxes(vid, net) {
-    const im_width = vid.width;//bound.width;
-    const im_height = vid.height;//bound.height;
-    const canv2 = document.getElementById('c2');
-    const ctx2 = canv2.getContext('2d');
-    ctx2.fillRect(0, 0, im_width, im_height);
-    ctx2.clearRect(0, 0, im_width, im_height);
-    async function objdetec() {
-
-        try {
-            let nbox = parseFloat(document.getElementById("nbox").value);
-            if (keep_call == 1) {
-                var cat__ = tf.tidy(() => {
-
-                    var cat_ = tf.fromPixels(vid);
-                    var resize = tf.image.resizeBilinear(cat_, [Math.round(vid.height / 4), Math.round(vid.width / 4)]);
-                    var cat__ = resize.expandDims(0);
-                    return cat__;
-                })
-
-                var im_ = cv.imread(canvas);
-                //var img ={image_tensor: cat__};
-                //const predic = await model.executeAsync(img) 
-                //await tf.nextFrame() 
-                //img = null
-
-                var predic = await net.executeAsync({ image_tensor: cat__ });
-
-                //box_detc = null
-                //net = null
-                //vid= null
-                console.log("...")
-                tf.tidy(() => {
-                    var boxes = tf.squeeze(predic[0]);
-                    var scores = tf.squeeze(predic[1]);
-                    var classs = tf.squeeze(predic[2]);
-                    var boxes_ = boxes.dataSync();
-                    var scores_ = scores.dataSync();
-                    var class_ = classs.dataSync();
-                    var scores_1
-
-                    //ymin, xmin, ymax, xmax = box (X,Y)
-                    //console.log("Boxes : ", boxes_);
-                    //console.log("Score : ", scores_);
-                    //console.log("Class : ", class_);
-                    scores_1 = scores_.slice(0, nbox);
-                    var i = 0;
-                    scores_1.forEach(scores__ => {
-                        if (scores__ > 0.4) {
-                            let point1 = new cv.Point(boxes_[i * 4 + 1] * im_width, boxes_[i * 4] * im_height);
-                            let point2 = new cv.Point(boxes_[i * 4 + 3] * im_width, boxes_[i * 4 + 2] * im_height);
-                            let point3 = new cv.Point(boxes_[i * 4 + 1] * im_width, boxes_[i * 4] * im_height - 10);
-                            let point3_ = new cv.Point(boxes_[i * 4 + 1] * im_width, boxes_[i * 4] * im_height - 24);
-                            let point4 = new cv.Point(boxes_[i * 4 + 3] * im_width, boxes_[i * 4] * im_height);
-                            cv.rectangle(im_, point1, point2, [255, 255, 255, 255], 3);
-                            cv.rectangle(im_, point3_, point4, [255, 255, 255, 255], -1); // relleno-filled
-                            cv.putText(im_, label[class_[i] - 1] + " " + Math.round(scores__ * 10000) / 100 + "%", point3, 0, im_height * 0.001, [0, 0, 0, 255], 1, cv.LINE_AA);
-                            console.log("00..cv");
-                        }
-                        i = i + 1;
-
-                    })
-                    //console.log("001..cv");
-                    //}
-                    document.getElementById('objects_detected').value = label[class_[0] - 1] + "  " + label[class_[1] - 1] + "  " + label[class_[2] - 1] + "  " + label[class_[3] - 1];
-                    cv.imshow('c2', im_);
-                    //ctx2.drawImage(vid, 0, 0, im_width, im_height);
-
-                    tf.dispose(boxes);
-                    tf.dispose(scores);
-                    tf.dispose(classs);
-
-                    tf.dispose(cat__);
-                    cat__ = null
-                })
-            } else {
-                tf.dispose(cat__);
-                ctx2.clearRect(0, 0, im_width, im_height);
-            }
-            await tf.nextFrame()
-
-        } catch (e) {
-            console.error(e);
-            alert("Error al cargar el Modelo");
-        }
-
-        animat = window.requestAnimationFrame(objdetec);
-    }
-
-    objdetec();
-
-}

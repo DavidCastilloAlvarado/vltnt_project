@@ -35,8 +35,8 @@
             <span>Vehículo Terrestre Liviano no Tripulado</span>
         </h1>
         <center>
-            <input type="text" readonly="readonly" id="data_ino" size="40" title="Datos recibidos del chassis">
-            <input type="text" readonly="readonly" id="data_arm" size="40" title="Datos recibidos del manipulador">
+            <input type="text" readonly="readonly" id="telem_robot" size="40" title="Datos recibidos del chassis">
+            <input type="text" readonly="readonly" id="control_resp" size="40" title="Datos recibidos del manipulador">
             <br>
             <br>
         <div class="card p-3 mx-4">
@@ -141,7 +141,7 @@
                         <fieldset id="datachannels" disabled>
                             <!-- <span>message: </span><input type="text" id="datamessage" value="" title="message to send to the remote peer"/> -->
                             <p><small>NOTE: Es necesario activar el CORS en el buscardor (Cross Origin Resource Sharing) para permitir la telemetría </small></p>
-                            <button id="datasend" class="btn btn-success" onclick="read_data();" title="Optiene los datos de telemetría" >Iniciar Comunicación</button>
+                            <button id="readdata" class="btn btn-success" onclick="read_data();" title="Optiene los datos de telemetría" >Iniciar Comunicación</button>
                             <label><input type="checkbox" onclick="keypresssend_selection();" id="keypresssend" name="keypresssend" title="Comando de control de Movimiento, permite el control de las ruedas y del brazo robótico">Comando de control de Movimiento</label>
                         </fieldset>
                     </details>
