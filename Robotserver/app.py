@@ -85,4 +85,4 @@ def vltnt():
 if __name__ == '__main__':
     port = 8010
     print("Servidor de telemetría&Control   http://localhost:"+str(port))
-    app.run(host='localhost' ,port=port, threaded=True, debug=1)
+    app.run(host='0.0.0.0' ,port=port, threaded=True, debug=1)
