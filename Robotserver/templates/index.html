@@ -1,0 +1,25 @@
+
+{% extends "base.html" %}
+
+{%block title%} VLTNT{%endblock%}
+
+{% block micontenido %}
+
+<div class="card text-center">
+    <div class="card-header">
+      Bienvenido
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">Panel de inicio del VLTNT</h5>
+      <p class="card-text">Revisar la pestaña info para obtener información sobre el manejo del robot.
+          De lo contrario ingrese al boton de abajo.
+      </p>
+      <a href="#" class="btn btn-primary">Iniciar VLTNT</a>
+    </div>
+    <div class="card-footer text-muted">
+      solo personal autorizado
+    </div>
+  </div>
+  <img src="{{ url_for('static', filename='img/uni.png') }}" height="200" class="rounded mx-auto d-block p-3" alt="...">
+
+{%endblock%}

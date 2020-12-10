@@ -13,7 +13,7 @@ import json
 import jsonpickle
 from flask import Flask, render_template, Response,request
 from control_serial import control_robot
-from serialize import WebJson2InoJson
+from serializer import WebJson2InoJson
 from settings import API_KEY
 
 # Inicializamos los dos robots esclavos
@@ -70,7 +70,16 @@ def control(robot):
     response_pickled = jsonpickle.encode(response)
     return Response(response=response_pickled, status=200 if ctrl_resp else 500, mimetype="application/json")
 
+@app.route("/")
+def home():
+    ctx = { "time": 1234}
+    return render_template("index.html",contexto = ctx)
+
+@app.route("/info")
+def info():
+    return render_template("info.html")
+
 if __name__ == '__main__':
     port = 8010
     print("Servidor de telemetría&Control   http://localhost:"+str(port))
-    app.run(host='localhost' ,port=port, threaded=True)
+    app.run(host='localhost' ,port=port, threaded=True, debug=1)

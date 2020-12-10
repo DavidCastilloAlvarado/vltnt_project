@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{%block title%} Info {%endblock%}
+
+{% block micontenido %}
+<html>
+ <center>
+<div class="container " >
+
+  <div class="card mb-3">
+    {%include "info/carousel.html" %}
+    <div class="card-body">
+      <h1 class="card-title">Controles</h1>
+      <p class="card-text">
+          Controles de teclado utilizados para el manejo del robot, estos se dividen en las siguientes categorias  
+      </p>
+      <div class="btn-group-vertical" role="group" aria-label="Basic mixed styles example">
+        <a  href="#chassis" class="btn btn-primary">Chassis</a>
+        <a href="#Manipulador" class="btn btn-secondary">Manipulador</a>
+        <a  href="#Switch" class="btn btn-info">Switch</a>
+      </div>
+      <p class="card-text"><small class="text-muted">Se muestran a continuación</small></p>
+    </div>
+  </div>
+  {%include "info/table_chassis.html" %}
+  {%include "info/table_manipulador.html" %}
+  {%include "info/table_switch.html" %}
+ </center>
+<br>
+<br>
+<br>
+<br>
+
+</html>
+
+
+
+
+
+{%endblock%}
