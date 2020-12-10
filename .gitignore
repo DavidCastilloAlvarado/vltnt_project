@@ -2,3 +2,10 @@ Robotserver/__pycache__
 .vscode
 __pycache__
 UIserver/
+lib
+lib64
+include
+bin
+share
+**.cfg
+share

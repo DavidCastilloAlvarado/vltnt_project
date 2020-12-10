@@ -1,3 +1,13 @@
 # Avoid write credential every time (do it just one time)
 git config credential.helper store
 git push origin master 
+
+python3.6 -m venv .
+source ./bin/activate
+
+#Almacenar todos los identificadores y versiones de los productos
+pip freeze > requirements.txt
+
+# Instalar todos los recursos 
+pip install -r requirements.txt
+
