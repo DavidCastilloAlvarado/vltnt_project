@@ -13,13 +13,14 @@ import json
 import jsonpickle
 from flask import Flask, render_template, Response,request
 from control_serial import control_robot
-from utiles import WebJson2InoJson
+from serialize import WebJson2InoJson
+from settings import API_KEY
 
 # Inicializamos los dos robots esclavos
 default_chassis = {"status":"wait"}
 control_arm     = {"A":None,"B":None,"C":None,"D":None,"P":None,"R":None}# A,B,C,D son los 4 ejes, PyR son las posiciones de los servos de la camara: EJE:|DIR(0,1)|STEP(INT) 
 default_arm     = {"status":"wait"}
-control_car     = {"D":None,"S":None} # D: es la direccion de movimiento (forward(1), backward(2), left(3), right(4)), S: velocidad del robot
+control_car     = {"D":None,"S":None} # D: es la direccion de movimiento (forward(1), backward(2), left(3), right(4)), S: velocidad del robot (0 a 9)
 arm_robot        = control_robot(serial_busy=[], 
                                 name_robot="arm", 
                                 control_format = control_arm,
@@ -51,24 +52,25 @@ def control(robot):
     # Recibiendo datos desde el frontend
     raw = request.data
     send_str = raw.decode('utf8').replace("\'", "\"")
-    comand = json.loads(send_str)
-    
+    command = json.loads(send_str)
+    assert command["key"] == API_KEY , "API_KEY ERROR"
+    command.pop("key")
     if robot == "arm":
         # El comando para tranformar las senales de avance y retroceso para el manipulador, falta implementar
         # TODO: transformar command (direcciones de movimiento to movement on the robot) a posiciones(angulos) en el robot
-        comand = WebJson2InoJson(comand,arm_robot)
-        ctrl_resp = arm_robot.control_device(data=comand)
+        command = WebJson2InoJson(command,arm_robot)
+        ctrl_resp = arm_robot.control_device(data=command)
     elif robot == "car":
-        comand = WebJson2InoJson(comand,chassis_robot)
-        ctrl_resp = chassis_robot.control_device(data=comand)
+        command = WebJson2InoJson(command,chassis_robot)
+        ctrl_resp = chassis_robot.control_device(data=command)
     
-    response = {'message': 'Control {} delivered: {}'.format(robot, ctrl_resp)
+    response = {'message': 'Control {} delivered'.format(robot), "status": ctrl_resp,
                 }
     # Codifica la respuesta using jsonpickle
     response_pickled = jsonpickle.encode(response)
-    return Response(response=response_pickled, status=200, mimetype="application/json")
+    return Response(response=response_pickled, status=200 if ctrl_resp else 500, mimetype="application/json")
 
 if __name__ == '__main__':
     port = 8010
-    print("Servidor de telemetría   http://localhost:"+str(port))
-    app.run(host='0.0.0.0' ,port=port, threaded=True)
+    print("Servidor de telemetría&Control   http://localhost:"+str(port))
+    app.run(host='localhost' ,port=port, threaded=True)
