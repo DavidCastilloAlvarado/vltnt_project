@@ -1,0 +1,179 @@
+###Para parar un servicio de servidor
+###
+###
+###   	ES NECESARIO QUE REALICEMOS ESTOS PASOS PRIMERO QUE TODO
+###
+###
+###
+$ sudo systemctl stop uv4l_uvc.service
+$ sudo systemctl status uv4l_uvc.service
+$ sudo systemctl start uv4l_uvc.service
+
+### iniciar un servicio de servidor con webcam
+
+$ sudo service uv4l_uvc --device-id=046d:082b restart
+
+## <<https://www.linux-projects.org/uv4l/tutorials/custom-webapp-with-face-detection/>>
+
+### Configurar los parámetros del servidor - webcam
+
+$ sudo nano /etc/uv4l/uv4l-uvc.conf
+
+### Configurar los parámetros del servidor - raspicam
+
+$ sudo nano /etc/uv4l/uv4l-raspicam.conf
+
+# Apagar el raspi
+
+sudo shutdown -h now
+sudo reboot -h now
+
+=========================================================================================
+
+Para iniciar el servicio de Menu Predeterminado
+
+uv4l --auto-video_nr --driver uvc --device-id=046d:082b \
+--server-option '--port=9000' \
+--server-option '--admin-password=myp4ssw0rd!'
+
+=== FUNCIONA -- Para el servido personalizado
+
+uv4l \
+--auto-video_nr \
+--driver uvc \
+--device-id=046d:082b \
+--server-option '--www-root-path=/usr/share/uv4l/demos/facedetection/' \
+--server-option '--www-index-file=index.html' \
+--server-option '--webrtc-hw-vcodec-maxbitrate=5000' \
+--server-option '--www-webrtc-signaling-path=/webrtc' \
+--server-option '--www-port=90' \
+--server-option '--enable-www-server=yes'\
+
+
+
+uv4l \
+--auto-video_nr \
+--driver uvc \
+--device-id=046d:082b \
+--server-option '--www-root-path=/usr/share/uv4l/demos/stream/' \
+--server-option '--www-index-file=index.html' \
+--server-option '--webrtc-hw-vcodec-maxbitrate=5000' \
+--server-option '--www-webrtc-signaling-path=/webrtc' \
+--server-option '--www-port=90' \
+--server-option '--enable-www-server=yes'\
+
+
+#=========================== Ultima Configuración Absolutamente estable===============
+uv4l \
+--auto-video_nr \
+--driver uvc \
+--device-id=046d:082b \
+--server-option '--www-root-path=/usr/share/uv4l/demos/stream/' \
+--server-option '--www-index-file=index2.html' \
+--server-option '--webrtc-hw-vcodec-maxbitrate=5000' \
+--server-option '--www-webrtc-signaling-path=/webrtc' \
+--server-option '--www-port=90' \
+--server-option '--enable-www-server=yes'\
+
+#=====================================================================================
+
+uv4l \
+--auto-video_nr \
+--driver uvc \
+--device-id=046d:082b \
+--server-option '--webrtc-hw-vcodec-maxbitrate=5000' \
+--server-option '--www-webrtc-signaling-path=/webrtc' \
+--server-option '--www-port=90' \
+--server-option '--enable-www-server=yes'\
+
+###device-path = <bus>:<address>
+==========================================================
+Crear una archivo ejecutable 
+
+nano server.sh 
+//////////////
+#!bin/bash
+
+bla bla
+
+//////////
+
+sudo chmod u+x server.sh             => Crea el ejecutable
+
+./server.sh                          => Ejecutar
+
+==============================================================
+Ejecutable al iniciar linux
+agregar la dirección del script shell en
+$ sudo nano /etc/rc.local
+agregarlo antes del exit 0
+
+# =================================================================
+
+==== Otro Metodo para iniciar el streaming=============
+1er paso : Inicia el server webrtc en el raspi 
+
+uv4l --auto-video_nr \
+--driver uvc \
+--device-id=046d:082b \
+--server-option '--use-ssl=yes' \
+--server-option '--ssl-private-key-file=/home/pi/Documents/selfsign.key' \
+--server-option '--ssl-certificate-file=/home/pi/Documents/selfsign.crt' \
+--server-option '--enable-webrtc=yes' \
+--server-option '--enable-webrtc-video=yes' \
+--server-option '--enable-webrtc-audio=yes' \
+--server-option '--port=9010' \
+
+
+
+--server-option '--admin-password=myp4ssw0rd!'
+
+2do Paso : Inicia el servidor que aloja los script
+
+- Script para el webRTC
+- Script para el tensorFlow
+- Script para el OpenCV
+- Interface para el web
+====================================2 Metodos 2
+
+uv4l --syslog-host localhost --driver uvc --device-id=046d:082b  --config-file=/etc/uv4l/uv4l-uvc.conf
+
+<colocar en autostart> sudo nano .config/lxsession/LXDE-pi/autostart
+@sudo /home/pi/server.sh
+@sudo python3 /home/pi/Desktop/arm/server/pack_raspi/app.py
+
+
+
+<Colocar en rc.local> sudo nano /etc/rc.local
+/home/pi/server.sh
+
+node /home/pi/Documents/final_server_robot_nodeJS2/local-server/app.js
+
+
+
+############ Archivo autostart para el robot ###########################
+
+@lenapxl --profile LXDE-pi
+@pcmanfm --desktop --profile LXDE-pi
+@xscreensaver -no-splash
+@point-rpi
+@sudo /home/pi/server.sh
+@node /home/pi/Documents/final_server_robot_nodeJS2/local-server/app.js   ##Servidor de la interface para el webRTC
+@sudo python3 /home/pi/Desktop/arm/server/pack_raspi/app.py               ##Servidor para responder al AJAX con la telemetría del arduino, enviando los angulos de inclinación y distancia de sensor
+@sudo python3 /home/pi/Desktop/arm/server/pack_raspi/server_raspi.py      ##servidor para controlar el movimiento del robot, tanto como desplazamiento como el brazo
+
+#############################################
+LA CONFIGURACION DEL SERVIDOR FUE REALIZADA EN EL ARCHIVO
+POR DEFECTO:
+
+pi@pivltnt:/etc/uv4l $ sudo nano uv4l-uvc.conf
+
+
+
+
+
+##### OTRO TEMA####
+Carpeta de archivo de laslibrerias de python
+$ cd /usr/lib/python3/dist-packages
+
+
