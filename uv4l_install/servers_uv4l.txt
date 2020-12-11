@@ -177,3 +177,9 @@ Carpeta de archivo de laslibrerias de python
 $ cd /usr/lib/python3/dist-packages
 
 
+#### Para reiniciar el cervicio de webrtc sin reiniciar el raspberry ####
+sudo ./uv4l_uvc remove
+sudo ./uv4l_uvc add 046d:082d
+
+
+
