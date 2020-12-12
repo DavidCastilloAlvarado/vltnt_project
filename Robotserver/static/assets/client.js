@@ -146,7 +146,7 @@ function start() {
       var request = {
         what: "call",
         options: {
-          force_hw_vcodec: document.getElementById("remote_hw_vcodec").checked,
+          force_hw_vcodec: true,//document.getElementById("remote_hw_vcodec").checked,
           vformat: document.getElementById("remote_vformat").value,
           trickle_ice: true,
         },
@@ -201,15 +201,6 @@ function start() {
               stop();
             }
           );
-
-          /*
-                               * No longer needed, it's implicit in "call"
-                              var request = {
-                                  what: "generateIceCandidates"
-                              };
-                              console.log(request);
-                              ws.send(JSON.stringify(request));
-                              */
           break;
 
         case "answer":
@@ -417,21 +408,23 @@ function download() {
   }
 }
 
-function remote_hw_vcodec_selection() {
-  if (!document.getElementById("remote_hw_vcodec").checked)
-    unselect_remote_hw_vcodec();
-  else select_remote_hw_vcodec();
-}
+// function remote_hw_vcodec_selection() {
+//   if (!document.getElementById("remote_hw_vcodec").checked)
+//     unselect_remote_hw_vcodec();
+//   else select_remote_hw_vcodec();
+// }
+
+// function remote_hw_vcodec_format_selection() {
+//   if (document.getElementById("remote_hw_vcodec").checked)
+//     remote_hw_vcodec_selection();
+// }
 
 function remote_hw_vcodec_format_selection() {
-  if (document.getElementById("remote_hw_vcodec").checked)
-    remote_hw_vcodec_selection();
-}
-
-function select_remote_hw_vcodec() {
-  document.getElementById("remote_hw_vcodec").checked = true;
+  // document.getElementById("remote_hw_vcodec").checked = true;
   var vformat = document.getElementById("remote_vformat").value;
+  console.log("este es el valor seleccionado " + vformat);
   switch (vformat) {
+    
     case "5":
       document.getElementById("remote-video").style.width = "320px";
       document.getElementById("remote-video").style.height = "240px";
@@ -440,30 +433,6 @@ function select_remote_hw_vcodec() {
       document.getElementById("remote-video").style.width = "320px";
       document.getElementById("remote-video").style.height = "240px";
       break;
-    case "20":
-      document.getElementById("remote-video").style.width = "352px";
-      document.getElementById("remote-video").style.height = "288px";
-      break;
-    case "25":
-      document.getElementById("remote-video").style.width = "640px";
-      document.getElementById("remote-video").style.height = "480px";
-      break;
-    case "30":
-      document.getElementById("remote-video").style.width = "640px";
-      document.getElementById("remote-video").style.height = "480px";
-      break;
-    case "35":
-      document.getElementById("remote-video").style.width = "800px";
-      document.getElementById("remote-video").style.height = "480px";
-      break;
-    case "40":
-      document.getElementById("remote-video").style.width = "960px";
-      document.getElementById("remote-video").style.height = "720px";
-      break;
-    case "50":
-      document.getElementById("remote-video").style.width = "1024px";
-      document.getElementById("remote-video").style.height = "768px";
-      break;
     case "55":
       document.getElementById("remote-video").style.width = "1280px";
       document.getElementById("remote-video").style.height = "720px";
@@ -471,42 +440,6 @@ function select_remote_hw_vcodec() {
     case "60":
       document.getElementById("remote-video").style.width = "1280px";
       document.getElementById("remote-video").style.height = "720px";
-      break;
-    case "63":
-      document.getElementById("remote-video").style.width = "1280px";
-      document.getElementById("remote-video").style.height = "720px";
-      break;
-    case "65":
-      document.getElementById("remote-video").style.width = "1280px";
-      document.getElementById("remote-video").style.height = "768px";
-      break;
-    case "70":
-      document.getElementById("remote-video").style.width = "1280px";
-      document.getElementById("remote-video").style.height = "768px";
-      break;
-    case "80":
-      document.getElementById("remote-video").style.width = "1280px";
-      document.getElementById("remote-video").style.height = "960px";
-      break;
-    case "90":
-      document.getElementById("remote-video").style.width = "1600px";
-      document.getElementById("remote-video").style.height = "768px";
-      break;
-    case "95":
-      document.getElementById("remote-video").style.width = "1640px";
-      document.getElementById("remote-video").style.height = "1232px";
-      break;
-    case "97":
-      document.getElementById("remote-video").style.width = "1640px";
-      document.getElementById("remote-video").style.height = "1232px";
-      break;
-    case "100":
-      document.getElementById("remote-video").style.width = "1920px";
-      document.getElementById("remote-video").style.height = "1080px";
-      break;
-    case "105":
-      document.getElementById("remote-video").style.width = "1920px";
-      document.getElementById("remote-video").style.height = "1080px";
       break;
     default:
       document.getElementById("remote-video").style.width = "1280px";
@@ -521,11 +454,11 @@ function select_remote_hw_vcodec() {
        */
 }
 
-function unselect_remote_hw_vcodec() {
-  document.getElementById("remote_hw_vcodec").checked = false;
-  document.getElementById("remote-video").style.width = "640px";
-  document.getElementById("remote-video").style.height = "480px";
-}
+// function unselect_remote_hw_vcodec() {
+//   document.getElementById("remote_hw_vcodec").checked = false;
+//   document.getElementById("remote-video").style.width = "640px";
+//   document.getElementById("remote-video").style.height = "480px";
+// }
 
 function requestAnimationFrame2(callback) {
   return setTimeout(callback, 1000);
