@@ -1,10 +1,13 @@
-ip_global = location.hostname; // Ip del servidor (raspi)
+ip_global = "192.168.0.100" //location.hostname; // Ip del servidor (raspi)
 port_webrtc = 9000; // Port del servidor webRTC(raspi)
 API_KEY = "BGsvAYWtkRmKa507TcThwD93NjeLHdmz";
-const video = document.getElementById("remote-video");
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d");
-
+const video = document.getElementById("remote-video");  //video-remote-overlay   remote-video
+const div_video = document.getElementById("video-remote-overlay");
+fullheight = window.screen.height
+fullwidth   = window.screen.width
+// const canvas = document.getElementById("c");
+// const ctx = canvas.getContext("2d");
+var sensor_reade_timeout;
 var signalling_server_hostname = location.hostname || ip_global;
 var ws = null;
 var pc;
@@ -268,6 +271,12 @@ function stop() {
     keypresssend_selection();
   }
 
+  if(document.getElementById("readdata").disabled){
+    document.getElementById("readdata").disabled = false;
+    console.log("button read data available");
+    clearTimeout(sensor_reade_timeout);
+  }
+
   stop_record();
   document.getElementById("remote-video").srcObject = null;
   document.getElementById("remote-video").src = ""; // TODO; remove
@@ -296,14 +305,18 @@ function pause() {
 }
 
 function fullscreen() {
-  var remoteVideo = document.getElementById("c"); // Llamando al canvas
-  if (remoteVideo.requestFullScreen) {
-    remoteVideo.requestFullScreen();
-  } else if (remoteVideo.webkitRequestFullScreen) {
-    remoteVideo.webkitRequestFullScreen();
-  } else if (remoteVideo.mozRequestFullScreen) {
-    remoteVideo.mozRequestFullScreen();
-  }
+  function fullelement(remoteVideo){
+    //var remoteVideo = video //document.getElementById("c"); // Llamando al canvas
+    if (remoteVideo.requestFullScreen) {
+      remoteVideo.requestFullScreen();
+    } else if (remoteVideo.webkitRequestFullScreen) {
+      remoteVideo.webkitRequestFullScreen();
+    } else if (remoteVideo.mozRequestFullScreen) {
+      remoteVideo.mozRequestFullScreen();
+    } 
+  };
+  // fullelement(video);
+  fullelement(div_video);
 }
 
 function handleDataAvailable(event) {
@@ -408,17 +421,6 @@ function download() {
   }
 }
 
-// function remote_hw_vcodec_selection() {
-//   if (!document.getElementById("remote_hw_vcodec").checked)
-//     unselect_remote_hw_vcodec();
-//   else select_remote_hw_vcodec();
-// }
-
-// function remote_hw_vcodec_format_selection() {
-//   if (document.getElementById("remote_hw_vcodec").checked)
-//     remote_hw_vcodec_selection();
-// }
-
 function remote_hw_vcodec_format_selection() {
   // document.getElementById("remote_hw_vcodec").checked = true;
   var vformat = document.getElementById("remote_vformat").value;
@@ -454,12 +456,6 @@ function remote_hw_vcodec_format_selection() {
        */
 }
 
-// function unselect_remote_hw_vcodec() {
-//   document.getElementById("remote_hw_vcodec").checked = false;
-//   document.getElementById("remote-video").style.width = "640px";
-//   document.getElementById("remote-video").style.height = "480px";
-// }
-
 function requestAnimationFrame2(callback) {
   return setTimeout(callback, 1000);
 }
@@ -475,7 +471,7 @@ function send_control(data_send, dest) {
     contentType: "application/json; charset=utf-8",
     dataType: "json",
     success: function (data) {
-      document.getElementById("control_resp").value = data["message"];
+      document.getElementById("control_resp").innerHTML  = data["message"];
       sended = 0;
     },
     failure: function (errMsg) {
@@ -622,6 +618,7 @@ window.onbeforeunload = function () {
 };
 
 function read_data() {
+  document.getElementById("readdata").className = "btn btn-danger";
   document.getElementById("readdata").disabled = true;
   try {
     $.ajax({
@@ -632,36 +629,27 @@ function read_data() {
       success: displayAll,
     });
     function displayAll(data) {
-      document.getElementById("telem_robot").value =
+      document.getElementById("telem_robot").innerHTML  =
         data.ang_x + " " + data.ang_y; //+ "    " + data.dist + " " + data.st1 + " " + data.st2;
     }
   } catch (e) {
     console.error(e);
   }
 
-  requestAnimationFrame2(read_data);
+  sensor_reade_timeout = requestAnimationFrame2(read_data);
 }
 ////////////////////////////////////////////////////////////////////////
 
-video.addEventListener(
-  "play",
-  function () {
-    // Every 33 milliseconds copy the video image to the canvas
-    setInterval(function () {
-      if (video.paused || video.ended) {
-        return;
-      }
-      var w = video.getAttribute("width");
-      var h = video.getAttribute("height");
-      ctx.fillRect(0, 0, w, h);
-      ctx.drawImage(video, 0, 0, w, h);
-      ctx.fillStyle = "black";
-      ctx.font = "20px Arial";
-      var text = document.getElementById("telem_robot").value;
-      var text2 = document.getElementById("control_resp").value;
-      ctx.strokeText(text, 20, 20);
-      ctx.strokeText(text2, 20, h - 20);
-    }, 33);
-  },
-  false
-);
+document.getElementById("video-remote-overlay").addEventListener('webkitfullscreenchange', (event) => {
+  // document.fullscreenElement will point to the element that
+  // is in fullscreen mode if there is one. If not, the value
+  // of the property is null.
+  if (document.fullscreenElement) {
+    console.log('Pantalla en fullscreen');
+    video.style.width = fullwidth+"px";
+    video.style.height = fullheight+"px";
+  } else {
+    console.log('Leaving full-screen mode.');
+    remote_hw_vcodec_format_selection()
+  }
+});

@@ -13,8 +13,8 @@
         }
 
         video {
-            background: #eee none repeat scroll 0 0;
-            border: 1px solid #aaa;
+            background: rgb(34, 15, 15) none repeat scroll 0 0;
+            border: 1px solid rgb(236, 236, 236);
         }
 
         .overlayWrapper {
@@ -38,33 +38,37 @@
 </head>
 
 <body>
-    <h1 class="text-center">
+    <h1 class="text-center my-3">
         <span>Vehículo Terrestre Liviano no Tripulado</span>
     </h1>
     <center>
-        <input type="text" readonly="readonly" id="telem_robot" size="40" title="Datos recibidos del chassis">
-        <input type="text" readonly="readonly" id="control_resp" size="40" title="Datos recibidos del manipulador">
-        <br>
-        <br>
-        <div class="card p-3 mx-4">
-            <div class="card-body">
-                <div id="container">
-                    <div class="overlayWrapper">
-                        <video id="remote-video" autoplay="" width="640" height="480" style="display: none">
-                            <!-- <video id="remote-video" width="640" height="480" style="display: none" > -->
-                            Your browser does not support the video tag.
-                        </video>
-                        <p class="overlay"></p>
-                    </div>
-                    <canvas id='c' width="640" height="480"></canvas>
-                    <canvas id='c2' width="640" height="480"></canvas>
+        <!-- <input type="text" readonly="readonly" id="telem_robot" size="40" title="Datos recibidos del chassis">
+        <input type="text" readonly="readonly" id="control_resp" size="40" title="Datos recibidos del manipulador"> -->
+
+        <div class="card text-white mx-4 text-center">
+            <div id="video-remote-overlay">
+                <!-- <div id="container">
+                </div> -->
+                <div class="overlayWrapper">
+                    <video id="remote-video" autoplay="" width="1280px" height="720px">
+                        <!-- <video id="remote-video" width="640" height="480" style="display: none" > -->
+                        Your browser does not support the video tag.
+                    </video>
                 </div>
+                <div class="card-img-overlay">
+                    <h3 class="card-title">Telemetría</h3>
+                    <h4 class="card-text" id="telem_robot"></h4>
+                    <h4 class="card-text">||</h4>
+                    <h4 class="card-text" id="control_resp"></h4>
+                </div>
+                <!-- <canvas id='c' width="1280px" height="720px"></canvas> -->
             </div>
+
         </div>
 
     </center>
 
-    <div class="card p-3 mx-4" id="buttonsControl">
+    <div class="card p-3 mx-4 my-4" id="buttonsControl">
         <div class="card-body">
             <div id="controls">
                 <center>
