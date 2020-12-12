@@ -3,6 +3,7 @@ port_webrtc = 9000; // Port del servidor webRTC(raspi)
 API_KEY = "BGsvAYWtkRmKa507TcThwD93NjeLHdmz";
 const video = document.getElementById("remote-video");  //video-remote-overlay   remote-video
 const div_video = document.getElementById("video-remote-overlay");
+document.getElementById("buttonsControl").style.display = "none";
 fullheight = window.screen.height
 fullwidth   = window.screen.width
 // const canvas = document.getElementById("c");
@@ -117,6 +118,8 @@ function onTrack(event) {
       .then((_) => {
         console.log("Reproduciendo");
         document.getElementById("datachannels").disabled = false;
+        document.getElementById("buttonsControl").style.display = "block";
+        document.getElementById("loading").style.display = "none";
       })
       .catch((error) => {
         // Auto-play was prevented
@@ -133,8 +136,10 @@ function onRemoteStreamRemoved(event) {
 
 function start() {
   if ("WebSocket" in window) {
+    div_video.scrollIntoView();
     document.getElementById("stop").disabled = false;
     document.getElementById("start").disabled = true;
+    document.getElementById("loading").style.display = "block";
     document.documentElement.style.cursor = "wait";
 
     var protocol = location.protocol === "https:" ? "wss:" : "ws:";
@@ -271,11 +276,10 @@ function stop() {
     keypresssend_selection();
   }
 
-  if(document.getElementById("readdata").disabled){
-    document.getElementById("readdata").disabled = false;
-    console.log("button read data available");
-    clearTimeout(sensor_reade_timeout);
-  }
+  clearTimeout(sensor_reade_timeout);
+  document.getElementById("readdata").className = "btn btn-success";
+  document.getElementById("readdata").innerHTML  = "Iniciar Comunicación";
+
 
   stop_record();
   document.getElementById("remote-video").srcObject = null;
@@ -618,25 +622,40 @@ window.onbeforeunload = function () {
 };
 
 function read_data() {
-  document.getElementById("readdata").className = "btn btn-danger";
-  document.getElementById("readdata").disabled = true;
-  try {
-    $.ajax({
-      // url: 'http://' + ip_global + ':8010/datos', // Es la dirección en donde se encuentra ejecutando el servidor, el cual es distinta a la dirección del WEBRTC (En caso de alojado en el raspi, el IP debe corresponder al IP del raspi)
-      url: location.origin + "/datos/" + "car",
-      type: "GET",
-      dataType: "json",
-      success: displayAll,
-    });
-    function displayAll(data) {
-      document.getElementById("telem_robot").innerHTML  =
-        data.ang_x + " " + data.ang_y; //+ "    " + data.dist + " " + data.st1 + " " + data.st2;
+  function getdata_server(){
+    try {
+      $.ajax({
+        // url: 'http://' + ip_global + ':8010/datos', // Es la dirección en donde se encuentra ejecutando el servidor, el cual es distinta a la dirección del WEBRTC (En caso de alojado en el raspi, el IP debe corresponder al IP del raspi)
+        url: location.origin + "/datos/" + "car",
+        type: "GET",
+        dataType: "json",
+        success: displayAll,
+      });
+      function displayAll(data) {
+        document.getElementById("telem_robot").innerHTML  =
+          data.ang_x + " " + data.ang_y; //+ "    " + data.dist + " " + data.st1 + " " + data.st2;
+      }
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
+    sensor_reade_timeout = requestAnimationFrame2(getdata_server);
   }
 
-  sensor_reade_timeout = requestAnimationFrame2(read_data);
+  if (document.getElementById("readdata").className != "btn btn-danger"){
+    div_video.scrollIntoView();
+    document.getElementById("readdata").className = "btn btn-danger";
+    document.getElementById("readdata").innerHTML  = "Cerrar canal";
+    getdata_server();
+  } else{
+    document.getElementById("readdata").className = "btn btn-success";
+    document.getElementById("readdata").innerHTML  = "Iniciar Comunicación";
+    clearTimeout(sensor_reade_timeout);
+  }
+
+  
+  // document.getElementById("readdata").disabled = true;
+
+  
 }
 ////////////////////////////////////////////////////////////////////////
 

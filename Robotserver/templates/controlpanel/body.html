@@ -60,7 +60,15 @@
                     <h4 class="card-text" id="telem_robot"></h4>
                     <h4 class="card-text">||</h4>
                     <h4 class="card-text" id="control_resp"></h4>
+                    <br>
+                    <center>
+                        <div class="spinner-border text-warning text-center"
+                            style="width: 3rem; height: 3rem;display: none;" role="status" id="loading">
+                            <span class="sr-only"></span>
+                        </div>
+                    </center>
                 </div>
+
                 <!-- <canvas id='c' width="1280px" height="720px"></canvas> -->
             </div>
 
@@ -68,7 +76,7 @@
 
     </center>
 
-    <div class="card p-3 mx-4 my-4" id="buttonsControl">
+    <div class="card p-3 mx-4 my-4" id="buttonsControl" style="display: none">
         <div class="card-body">
             <div id="controls">
                 <center>
@@ -101,10 +109,10 @@
                     </div> -->
                     <select class="form-select form-select-lg mb-3" id="remote_vformat" name="remote_vformat"
                         onclick="remote_hw_vcodec_format_selection();" title="Resoluciones y FPS disponibles">
-                        <option value="5" title="320x240 15 fps">Baja calidad lento*</option>
-                        <option value="10" title="320x240 30 fps">Baja calidad rapido*</option>
-                        <option value="55" title="1280x720 15 fps">Alta calidad lento</option>
-                        <option value="60" title="1280x720 30 fps" selected="selected">Alta calidad rápido</option>
+                        <option value="5" title="320x240 15 fps">Baja calidad - 15fps*</option>
+                        <option value="10" title="320x240 30 fps">Baja calidad - 30fps*</option>
+                        <option value="55" title="1280x720 15 fps">Alta calidad - 15fps</option>
+                        <option value="60" title="1280x720 30 fps" selected="selected">Alta calidad - 30fps</option>
                     </select>
 
                 </div>
@@ -143,7 +151,7 @@
         <div class="card-body">
             <div>
                 <details open>
-                    <summary><b>Telemetría y control</b></summary>
+                    <summary><b>Telemetría y Control</b></summary>
                     <br>
                     <fieldset id="datachannels" disabled>
                         <!-- <span>message: </span><input type="text" id="datamessage" value="" title="message to send to the remote peer"/> -->
@@ -152,9 +160,9 @@
                         <button id="readdata" class="btn btn-success" onclick="read_data();"
                             title="Optiene los datos de telemetría">Iniciar Comunicación</button>
                         <label><input type="checkbox" onclick="keypresssend_selection();" id="keypresssend"
-                                name="keypresssend"
-                                title="Comando de control de Movimiento, permite el control de las ruedas y del brazo robótico">Comando
-                            de control de Movimiento</label>
+                                name="keypresssend" class="form-check-input"
+                                title="Comando de control de Movimiento, permite el control de las ruedas y del brazo robótico">
+                            Activar comandos de controls</label>
                     </fieldset>
                 </details>
             </div>
@@ -177,7 +185,7 @@
                 <center>
 
                     <button id="start" class="btn btn-success btn-lg" onclick="start();">Iniciar VLTNT</button>
-                    <button disabled id="stop" class="btn btn-danger btn-lg" onclick="stop();">Parar</button>
+                    <button disabled id="stop" class="btn btn-danger btn-lg" onclick="stop();">Detener </button>
                 </center>
             </div>
 
