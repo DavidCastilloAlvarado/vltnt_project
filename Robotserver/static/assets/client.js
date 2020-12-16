@@ -651,11 +651,6 @@ function read_data() {
     document.getElementById("readdata").innerHTML  = "Iniciar Comunicación";
     clearTimeout(sensor_reade_timeout);
   }
-
-  
-  // document.getElementById("readdata").disabled = true;
-
-  
 }
 ////////////////////////////////////////////////////////////////////////
 
