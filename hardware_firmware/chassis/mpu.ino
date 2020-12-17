@@ -53,10 +53,10 @@ void MPU_sensor()
         roll = 180 - fusion.getRoll() > 180 ? -180.0 - fusion.getRoll() : 180 - fusion.getRoll();
         yaw = fusion.getYaw();
 
-        Serial.println(pitch);
-        Serial.println(roll);
-        Serial.println(yaw);
-        Serial.println();
+        // Serial.println(pitch);
+        // Serial.println(roll);
+        // Serial.println(yaw);
+        // Serial.println();
     }
 }
 
@@ -65,21 +65,22 @@ void MPU_calibrate()
     if (mpu_started)
     {
         drrMAGBS drrparm;
-        Status_cal = "M_8";
+        wdt_disable(); // Detiene el watdog para que la calibración sea posible, de lo contrario reiniciará el arduino antes de acabar
         IMU.calibrateMag();
-        Status_cal = "M_ok_5";
-        EEPROM.update(drrparm.biasx, IMU.getMagBiasX_uT());
-        EEPROM.update(drrparm.biasy, IMU.getMagBiasY_uT());
-        EEPROM.update(drrparm.biasz, IMU.getMagBiasZ_uT());
-        EEPROM.update(drrparm.scalx, IMU.getMagScaleFactorX());
-        EEPROM.update(drrparm.scaly, IMU.getMagScaleFactorY());
-        EEPROM.update(drrparm.scalz, IMU.getMagScaleFactorZ());
+        wdt_enable(WDTO_1S); // ReIniciando el WDT
+        // Serial.println("Completado");
 
-        delay(5000);
-        Status_cal = "G";
-        IMU.calibrateGyro();
-        Status_cal = "A";
-        IMU.calibrateAccel();
-        Status_cal = "";
+        EEPROM.put(drrparm.biasx, IMU.getMagBiasX_uT());
+        EEPROM.put(drrparm.biasy, IMU.getMagBiasY_uT());
+        EEPROM.put(drrparm.biasz, IMU.getMagBiasZ_uT());
+        EEPROM.put(drrparm.scalx, IMU.getMagScaleFactorX());
+        EEPROM.put(drrparm.scaly, IMU.getMagScaleFactorY());
+        EEPROM.put(drrparm.scalz, IMU.getMagScaleFactorZ());
+        // delay(5000);
+        // Status_cal = "G";
+        // IMU.calibrateGyro();
+        // Status_cal = "A";
+        // IMU.calibrateAccel();
+        // Status_cal = "";
     }
 }
