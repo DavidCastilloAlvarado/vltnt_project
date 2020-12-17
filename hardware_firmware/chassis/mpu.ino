@@ -17,18 +17,21 @@ void init_MPU_sensor()
         float scal = 0.00f;
         EEPROM.get(drrparm.biasx, bias);
         EEPROM.get(drrparm.scalx, scal);
+        scal = scal == 0.00 ? 1.00 : scal;
         IMU.setMagCalX(bias, scal);
 
         bias = 0.00f;
         scal = 0.00f;
         EEPROM.get(drrparm.biasy, bias);
         EEPROM.get(drrparm.scaly, scal);
+        scal = scal == 0.00 ? 1.00 : scal;
         IMU.setMagCalY(bias, scal);
 
         bias = 0.00f;
         scal = 0.00f;
         EEPROM.get(drrparm.biasz, bias);
         EEPROM.get(drrparm.scalz, scal);
+        scal = scal == 0.00 ? 1.00 : scal;
         IMU.setMagCalZ(bias, scal);
     }
 }
@@ -52,11 +55,6 @@ void MPU_sensor()
         pitch = -1 * fusion.getPitch();
         roll = 180 - fusion.getRoll() > 180 ? -180.0 - fusion.getRoll() : 180 - fusion.getRoll();
         yaw = fusion.getYaw();
-
-        // Serial.println(pitch);
-        // Serial.println(roll);
-        // Serial.println(yaw);
-        // Serial.println();
     }
 }
 
@@ -68,7 +66,6 @@ void MPU_calibrate()
         wdt_disable(); // Detiene el watdog para que la calibración sea posible, de lo contrario reiniciará el arduino antes de acabar
         IMU.calibrateMag();
         wdt_enable(WDTO_1S); // ReIniciando el WDT
-        // Serial.println("Completado");
 
         EEPROM.put(drrparm.biasx, IMU.getMagBiasX_uT());
         EEPROM.put(drrparm.biasy, IMU.getMagBiasY_uT());
@@ -76,11 +73,5 @@ void MPU_calibrate()
         EEPROM.put(drrparm.scalx, IMU.getMagScaleFactorX());
         EEPROM.put(drrparm.scaly, IMU.getMagScaleFactorY());
         EEPROM.put(drrparm.scalz, IMU.getMagScaleFactorZ());
-        // delay(5000);
-        // Status_cal = "G";
-        // IMU.calibrateGyro();
-        // Status_cal = "A";
-        // IMU.calibrateAccel();
-        // Status_cal = "";
     }
 }

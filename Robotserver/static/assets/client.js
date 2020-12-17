@@ -633,14 +633,14 @@ function read_data() {
       });
       function displayAll(data) {
         document.getElementById("telem_robot").innerHTML  =
-          data.ang_x + " " + data.ang_y; //+ "    " + data.dist + " " + data.st1 + " " + data.st2;
+          "Roll:" + data.roll + " Pitch:" + data.pitch + " Yaw:" + data.yaw + " Tc:" + data.Tm  + " Mv:" + data.DIR + " " + data.SP;
       }
     } catch (e) {
       console.error(e);
     }
     sensor_reade_timeout = requestAnimationFrame2(getdata_server);
   }
-
+// Comportamiento del Botom al momento de iniciar y parar la comunicación
   if (document.getElementById("readdata").className != "btn btn-danger"){
     div_video.scrollIntoView();
     document.getElementById("readdata").className = "btn btn-danger";

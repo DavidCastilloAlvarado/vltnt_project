@@ -12,12 +12,12 @@ float yaw = 0;
 // direcciones para los valores floats de calibración del magnetometro en el EEPROM
 struct drrMAGBS
 {
-    int biasx = 0;
-    int biasy = 5;
-    int biasz = 10;
-    int scalx = 15;
-    int scaly = 20;
-    int scalz = 25;
+    byte biasx = 0;
+    byte biasy = 5;
+    byte biasz = 10;
+    byte scalx = 15;
+    byte scaly = 20;
+    byte scalz = 25;
 };
 /*---------------------------HC RC04---------------------------------*/
 const int Trigger = 9; //Pin digital 2 para el Trigger del sensor
@@ -41,4 +41,3 @@ unsigned long time_run = 250;    // Tiempo que permanecera con la orden en milis
 unsigned long time_run_prev = 0; // Variable global en donde se almacenará el tiempo previo
 String Status_dir = "";
 String Status_speed = "";
-String Status_cal = "";

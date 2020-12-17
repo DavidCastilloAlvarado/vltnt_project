@@ -9,7 +9,6 @@ void send_telemetry()
                 String(",") + String("'dist':") + String(int(dist_obst)) +
                 String(",") + String("'DIR':") + Status_dir +
                 String(",") + String("'SP':") + Status_speed +
-                String(",") + String("'C':") + Status_cal +
                 String("}");
     Serial.println(data_send);
 }
