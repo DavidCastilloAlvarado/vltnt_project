@@ -491,9 +491,18 @@ function message(dir, speed) {
   if (+new Date() - time_ > 200 && sended == 0) {
     if (speed == -1) {
       console.log(dir);
-      var move_data = { order: dir };
+      var move_data = { order: dir, key: API_KEY  };
       send_control(move_data, "arm");
-    } else {
+    }else if(speed == -2){
+      console.log(dir);
+      var aux_data = { aux: dir, key: API_KEY  };
+      send_control(aux_data, "car");
+    }else if(speed == -3){
+      console.log(dir);
+      var aux_data = { aux: dir, key: API_KEY  };
+      send_control(aux_data, "arm");
+    }  
+    else {
       console.log(dir);
       var move_data = { D: dir, S: speed, key: API_KEY };
       send_control(move_data, "car");
@@ -591,7 +600,11 @@ function keydown(e) {
   } else if (event.keyCode == 80) {
     // p cierra griper
     return message("cl", -1);
-  }
+  } 
+}
+
+function calibration_buttom(){
+  return message(2, -2) // -2 es para enviar el comando auxiliar al chassis
 }
 
 function keypresssend_selection() {

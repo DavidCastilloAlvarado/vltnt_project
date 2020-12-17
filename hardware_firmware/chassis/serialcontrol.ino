@@ -23,6 +23,10 @@ void response_order(int order)
     {
         send_telemetry();
     }
+    else if (order == 2)
+    {
+        MPU_calibrate();
+    }
 }
 
 void serialEvent()
@@ -42,10 +46,6 @@ void serialEvent()
         else if (function == "MV")
         {
             robot_move(inData);
-        }
-        else if (function == "CA")
-        {
-            MPU_calibrate();
         }
         //Serial.println(inData);
         inData = "";

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{%block title%} Compass {%endblock%}
+
+{% block micontenido %}
+
+<div class="card text-center p-3 mx-4 my-4">
+    <div class="card-header p-3 mx-4">
+        Panel de Calibración de la Brújula
+    </div>
+    <div class="card-body p-3 mx-4">
+        <h5 class="card-title">Indicaciones</h5>
+        <p class="card-text">No ejecutar en caso no sea necesario. <br>
+            Mueva el robot formando el número 8 en el espacio
+        </p>
+        <button class="btn btn-danger" onclick="calibration_buttom();">Iniciar Calibración</button>
+    </div>
+    <div class="card-footer text-muted" id="status_panel">
+        solo personal autorizado
+    </div>
+</div>
+<img src="{{ url_for('static', filename='pictures/compasscal.png') }}" height="200" class="rounded mx-auto d-block p-3"
+    alt="...">
+<br>
+<br>
+<br>
+<br>
+<br>
+<script src="{{ url_for('static', filename='assets/calibration.js') }}"> </script>
+{%endblock%}
