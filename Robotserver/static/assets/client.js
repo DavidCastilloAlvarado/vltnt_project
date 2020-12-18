@@ -1,4 +1,4 @@
-ip_global = "192.168.0.100" //location.hostname; // Ip del servidor (raspi)
+ip_global = location.hostname; // Ip del servidor (raspi) "192.168.0.100" //
 port_webrtc = 9000; // Port del servidor webRTC(raspi)
 API_KEY = "BGsvAYWtkRmKa507TcThwD93NjeLHdmz";
 const video = document.getElementById("remote-video");  //video-remote-overlay   remote-video
