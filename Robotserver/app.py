@@ -46,6 +46,10 @@ def telemetry(robot):
         data_json, linked = arm_robot.get_telemetry_data()
     elif robot == "car":
         data_json, linked = chassis_robot.get_telemetry_data()
+    elif robot == "reset":
+        print("Reset raspi")
+        data_json, linked = {"status": "reset"}, True
+        os.system("sudo reboot")
 
     data_json = json.dumps(data_json)
     return Response(response=data_json, status=200 if linked else 400, mimetype="application/json")
