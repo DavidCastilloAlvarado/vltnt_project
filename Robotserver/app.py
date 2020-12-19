@@ -75,8 +75,6 @@ def control(robot):
         elif robot == "car":
             command = WebJson2InoJson(command, chassis_robot)
             ctrl_resp = chassis_robot.control_device(data=command)
-        elif robot == "reset":
-            os.system("sudo reboot")
 
     else:
         assert command["aux"] > 1, "Auxiliar command error"
