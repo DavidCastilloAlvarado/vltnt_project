@@ -670,7 +670,7 @@ function read_data() {
         },
       });
       function displayAll(data) {
-        speed_ = 100 - parseInt(data.SP)
+        speed_ = data.DIR != "STOP" ? 100 - parseInt(data.SP) : 0;
         document.getElementById("telem_robot").innerHTML =
           "Roll:" + data.roll + " Pitch:" + data.pitch + " Yaw:" + data.yaw + " Tc:" + data.Tm + "| Distancia:" + data.dist + "| Mov:" + data.DIR + " " + speed_;
       }
