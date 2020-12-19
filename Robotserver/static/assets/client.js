@@ -545,8 +545,8 @@ function keydown(e) {
   } else if (event.keyCode == 187) {
     // tecla de suma, en el  cuerpo del teclado
     speed = speed + 1;
-    if (speed > 9) {
-      speed = 9;
+    if (speed > 5) {
+      speed = 5;
     }
   } else if (event.keyCode == 189) {
     // tecla de resta, en el cuerpo del teclado
@@ -670,8 +670,9 @@ function read_data() {
         },
       });
       function displayAll(data) {
+        speed_ = 100 - parseInt(data.SP)
         document.getElementById("telem_robot").innerHTML =
-          "Roll:" + data.roll + " Pitch:" + data.pitch + " Yaw:" + data.yaw + " Tc:" + data.Tm + " Mv:" + data.DIR + " " + data.SP;
+          "Roll:" + data.roll + " Pitch:" + data.pitch + " Yaw:" + data.yaw + " Tc:" + data.Tm + "| Distancia:" + data.dist + "| Mov:" + data.DIR + " " + speed_;
       }
     } catch (e) {
       console.error(e);
