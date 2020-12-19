@@ -542,13 +542,13 @@ function keydown(e) {
   } else if (event.keyCode == 37) {
     // flecha hacia la izquierda
     return message(4, speed);
-  } else if (event.keyCode == 187) {
+  } else if (event.keyCode == 189) {
     // tecla de suma, en el  cuerpo del teclado
     speed = speed + 1;
     if (speed > 5) {
       speed = 5;
     }
-  } else if (event.keyCode == 189) {
+  } else if (event.keyCode == 187) {
     // tecla de resta, en el cuerpo del teclado
     speed = speed - 1;
     if (speed < 0) {
