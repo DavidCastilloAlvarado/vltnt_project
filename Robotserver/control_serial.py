@@ -110,7 +110,8 @@ class control_robot(object):
 
     def get_telemetry_data(self):
         """
-        Función que devuelve la información que envía el robot esclavo\n
+        Función que devuelve la información que envía el robot esclavo, y un segundo valor (True, False)\n
+        que indica si se logró o no establecer la conexión con elrobot.
         Devuelve los datos de telemetria obtenidos, en caso de falla devuelve los datos \n
         por defecto.\n
         """
@@ -121,8 +122,8 @@ class control_robot(object):
         except:
             # self.serial_link.close()
             self.serial_link, self.serial_number = self._get_serial()
-            return self.id_response
-        return telemetry_data
+            return self.id_response, False
+        return telemetry_data, True
 
     def control_device(self, data):
         """

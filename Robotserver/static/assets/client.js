@@ -1,11 +1,11 @@
-ip_global = location.hostname; // Ip del servidor (raspi) "192.168.0.100" //
+ip_global = "192.168.1.106" // location.hostname; // Ip del servidor (raspi) "192.168.0.100" //
 port_webrtc = 9000; // Port del servidor webRTC(raspi)
 API_KEY = "BGsvAYWtkRmKa507TcThwD93NjeLHdmz";
 const video = document.getElementById("remote-video");  //video-remote-overlay   remote-video
 const div_video = document.getElementById("video-remote-overlay");
 document.getElementById("buttonsControl").style.display = "none";
 fullheight = window.screen.height
-fullwidth   = window.screen.width
+fullwidth = window.screen.width
 // const canvas = document.getElementById("c");
 // const ctx = canvas.getContext("2d");
 var sensor_reade_timeout;
@@ -204,7 +204,7 @@ function start() {
             function onRemoteSdpError(event) {
               alert(
                 "Failed to set remote description (unsupported codec on this browser?): " +
-                  event
+                event
               );
               stop();
             }
@@ -278,7 +278,7 @@ function stop() {
 
   clearTimeout(sensor_reade_timeout);
   document.getElementById("readdata").className = "btn btn-success";
-  document.getElementById("readdata").innerHTML  = "Iniciar Comunicación";
+  document.getElementById("readdata").innerHTML = "Iniciar Comunicación";
 
 
   stop_record();
@@ -309,7 +309,7 @@ function pause() {
 }
 
 function fullscreen() {
-  function fullelement(remoteVideo){
+  function fullelement(remoteVideo) {
     //var remoteVideo = video //document.getElementById("c"); // Llamando al canvas
     if (remoteVideo.requestFullScreen) {
       remoteVideo.requestFullScreen();
@@ -317,7 +317,7 @@ function fullscreen() {
       remoteVideo.webkitRequestFullScreen();
     } else if (remoteVideo.mozRequestFullScreen) {
       remoteVideo.mozRequestFullScreen();
-    } 
+    }
   };
   // fullelement(video);
   fullelement(div_video);
@@ -378,9 +378,9 @@ function startRecording(stream) {
     console.error("Exception while creating MediaRecorder: " + e);
     alert(
       "Exception while creating MediaRecorder: " +
-        e +
-        ". mimeType: " +
-        options.mimeType
+      e +
+      ". mimeType: " +
+      options.mimeType
     );
     return;
   }
@@ -430,7 +430,7 @@ function remote_hw_vcodec_format_selection() {
   var vformat = document.getElementById("remote_vformat").value;
   console.log("este es el valor seleccionado " + vformat);
   switch (vformat) {
-    
+
     case "5":
       document.getElementById("remote-video").style.width = "320px";
       document.getElementById("remote-video").style.height = "240px";
@@ -475,12 +475,19 @@ function send_control(data_send, dest) {
     contentType: "application/json; charset=utf-8",
     dataType: "json",
     success: function (data) {
-      document.getElementById("control_resp").innerHTML  = data["message"];
+      document.getElementById("control_resp").innerHTML = data["message"];
       sended = 0;
     },
     failure: function (errMsg) {
       sended = 0;
       alert(errMsg);
+    },
+    statusCode: {
+      400: function () {
+        document.getElementById("control_resp").innerHTML = "Error al comandar";
+        sended = 0;
+        alert("Error en el servidor /control/");
+      }
     },
   });
 }
@@ -491,17 +498,17 @@ function message(dir, speed) {
   if (+new Date() - time_ > 200 && sended == 0) {
     if (speed == -1) {
       console.log(dir);
-      var move_data = { order: dir, key: API_KEY  };
+      var move_data = { order: dir, key: API_KEY };
       send_control(move_data, "arm");
-    }else if(speed == -2){
+    } else if (speed == -2) {
       console.log(dir);
-      var aux_data = { aux: dir, key: API_KEY  };
+      var aux_data = { aux: dir, key: API_KEY };
       send_control(aux_data, "car");
-    }else if(speed == -3){
+    } else if (speed == -3) {
       console.log(dir);
-      var aux_data = { aux: dir, key: API_KEY  };
+      var aux_data = { aux: dir, key: API_KEY };
       send_control(aux_data, "arm");
-    }  
+    }
     else {
       console.log(dir);
       var move_data = { D: dir, S: speed, key: API_KEY };
@@ -600,10 +607,10 @@ function keydown(e) {
   } else if (event.keyCode == 80) {
     // p cierra griper
     return message("cl", -1);
-  } 
+  }
 }
 
-function calibration_buttom(){
+function calibration_buttom() {
   return message(2, -2) // -2 es para enviar el comando auxiliar al chassis
 }
 
@@ -629,13 +636,13 @@ window.onload = function () {
 window.onbeforeunload = function () {
   // Detiene la comunicación antes de cerrar la pagina
   if (ws) {
-    ws.onclose = function () {}; // disable onclose handler first
+    ws.onclose = function () { }; // disable onclose handler first
     stop();
   }
 };
 
 function read_data() {
-  function getdata_server(){
+  function getdata_server() {
     try {
       $.ajax({
         // url: 'http://' + ip_global + ':8010/datos', // Es la dirección en donde se encuentra ejecutando el servidor, el cual es distinta a la dirección del WEBRTC (En caso de alojado en el raspi, el IP debe corresponder al IP del raspi)
@@ -643,25 +650,43 @@ function read_data() {
         type: "GET",
         dataType: "json",
         success: displayAll,
+        failure: function (errMsg) {
+          document.getElementById("telem_robot").innerHTML = "Falla de conexión";
+          alert(errMsg);
+          if (document.getElementById("readdata").className == "btn btn-danger") {
+            read_data()
+          }
+          clearTimeout(sensor_reade_timeout);
+        },
+        statusCode: {
+          400: function () {
+            document.getElementById("telem_robot").innerHTML = "Error de conexión 400";
+            alert("Error del servidor /datos/");
+            if (document.getElementById("readdata").className == "btn btn-danger") {
+              read_data()
+            }
+            clearTimeout(sensor_reade_timeout);
+          }
+        },
       });
       function displayAll(data) {
-        document.getElementById("telem_robot").innerHTML  =
-          "Roll:" + data.roll + " Pitch:" + data.pitch + " Yaw:" + data.yaw + " Tc:" + data.Tm  + " Mv:" + data.DIR + " " + data.SP;
+        document.getElementById("telem_robot").innerHTML =
+          "Roll:" + data.roll + " Pitch:" + data.pitch + " Yaw:" + data.yaw + " Tc:" + data.Tm + " Mv:" + data.DIR + " " + data.SP;
       }
     } catch (e) {
       console.error(e);
     }
     sensor_reade_timeout = requestAnimationFrame2(getdata_server);
   }
-// Comportamiento del Botom al momento de iniciar y parar la comunicación
-  if (document.getElementById("readdata").className != "btn btn-danger"){
+  // Comportamiento del Botom al momento de iniciar y parar la comunicación
+  if (document.getElementById("readdata").className != "btn btn-danger") {
     div_video.scrollIntoView();
     document.getElementById("readdata").className = "btn btn-danger";
-    document.getElementById("readdata").innerHTML  = "Cerrar canal";
+    document.getElementById("readdata").innerHTML = "Cerrar canal";
     getdata_server();
-  } else{
+  } else {
     document.getElementById("readdata").className = "btn btn-success";
-    document.getElementById("readdata").innerHTML  = "Iniciar Comunicación";
+    document.getElementById("readdata").innerHTML = "Iniciar Comunicación";
     clearTimeout(sensor_reade_timeout);
   }
 }
@@ -673,8 +698,8 @@ document.getElementById("video-remote-overlay").addEventListener('webkitfullscre
   // of the property is null.
   if (document.fullscreenElement) {
     console.log('Pantalla en fullscreen');
-    video.style.width = fullwidth+"px";
-    video.style.height = fullheight+"px";
+    video.style.width = fullwidth + "px";
+    video.style.height = fullheight + "px";
   } else {
     console.log('Leaving full-screen mode.');
     remote_hw_vcodec_format_selection()

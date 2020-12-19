@@ -15,6 +15,7 @@ from flask import Flask, render_template, Response, request
 from control_serial import control_robot
 from serializer import WebJson2InoJson
 from settings import API_KEY
+import os
 
 # Inicializamos los dos robots esclavos
 default_chassis = {"status": "wait"}
@@ -42,12 +43,12 @@ def telemetry(robot):
     global arm_robot
 
     if robot == "arm":
-        data_json = arm_robot.get_telemetry_data()
+        data_json, linked = arm_robot.get_telemetry_data()
     elif robot == "car":
-        data_json = chassis_robot.get_telemetry_data()
+        data_json, linked = chassis_robot.get_telemetry_data()
 
     data_json = json.dumps(data_json)
-    return Response(data_json)
+    return Response(response=data_json, status=200 if linked else 400, mimetype="application/json")
 
 
 @app.route('/control/<robot>', methods=['POST'])
@@ -70,6 +71,9 @@ def control(robot):
         elif robot == "car":
             command = WebJson2InoJson(command, chassis_robot)
             ctrl_resp = chassis_robot.control_device(data=command)
+        elif robot == "reset":
+            os.system("sudo reboot")
+
     else:
         assert command["aux"] > 1, "Auxiliar command error"
         if robot == "arm":
