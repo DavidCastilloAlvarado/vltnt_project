@@ -21,7 +21,7 @@ import os
 default_chassis = {"status": "wait"}
 # A,B,C,D son los 4 ejes, PyR son las posiciones de los servos de la camara: EJE:|DIR(0,1)|STEP(INT)
 control_arm = {"A": None, "B": None,
-               "C": None, "D": None, "P": None, "R": None}
+               "C": None, "D": None, "Y": None, "P": None, "S": None}
 default_arm = {"status": "wait"}
 # D: es la direccion de movimiento (forward(1), backward(2), left(3), right(4)), S: velocidad del robot (0 a 9)
 control_car = {"D": None, "S": None}

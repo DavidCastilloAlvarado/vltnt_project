@@ -28,6 +28,7 @@ void init_Motor_control()
     pinMode(IN1[1], OUTPUT);
     pinMode(IN2[1], OUTPUT);
     pinMode(PWMp[1], OUTPUT);
+    Motor_action(0, 0);
 }
 
 void shaftrev(int in1, int in2, int PWM, int sentido, int Wpulse)
@@ -45,10 +46,10 @@ void shaftrev(int in1, int in2, int PWM, int sentido, int Wpulse)
         digitalWrite(in1, HIGH);
         analogWrite(PWM, Wpulse);
         break;
-    case 3: // STOP
-        digitalWrite(in2, LOW);
-        digitalWrite(in1, LOW);
-        analogWrite(PWM, Wpulse);
+    case 3:                      // STOP
+        digitalWrite(in2, HIGH); // se está usando un circuito optoacoplado, por lo que se tuvo que invertir
+        digitalWrite(in1, HIGH); // se invitió de LOW a HIGH para evitar el esfuerzo del
+        analogWrite(PWM, 255);   // Wpulse se reemplazo por 255
         break;
     }
 }

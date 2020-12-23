@@ -9,7 +9,7 @@ byte mpu_started = 0;
 float pitch = 0;
 float roll = 0;
 float yaw = 0;
-// direcciones para los valores floats de calibración del magnetometro en el EEPROM
+// direcciones para los valores floats de calibración del magnetometro almacenados en la memoría EEPROM
 struct drrMAGBS
 {
     byte biasx = 0;

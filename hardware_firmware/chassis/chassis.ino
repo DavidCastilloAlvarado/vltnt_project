@@ -36,7 +36,7 @@ void setup()
 
 void loop()
 {
-  stop_motor_time_run(); //detener las me
+  stop_motor_time_run(); //detener el motor,
   MPU_sensor();          // reller el IMU
   HC_RC04();
   wdt_reset(); // reset watch dog

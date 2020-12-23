@@ -133,14 +133,12 @@ const int Output51 = 51;
 const int Output52 = 52;
 const int Output53 = 53;
 
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //DRIVE MOTORS J
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void driveMotorsJ(String inData) {
+void driveMotorsJ(String inData)
+{
   int J1start = inData.indexOf('A');
   int J2start = inData.indexOf('B');
   int J3start = inData.indexOf('C');
@@ -316,7 +314,6 @@ void driveMotorsJ(String inData) {
   int highStepCur = 0;
   float curDelay = 0;
 
-
   //SET DIRECTIONS
 
   /////// J1 /////////
@@ -445,8 +442,6 @@ void driveMotorsJ(String inData) {
     digitalWrite(TRdirPin, LOW);
   }
 
-
-
   /////CALC SPEEDS//////
   float ACCStep = (HighStep * (ACCdur / 100));
   float DCCStep = HighStep - (HighStep * (DCCdur / 100));
@@ -467,9 +462,6 @@ void driveMotorsJ(String inData) {
   float DCCSpeed = (CalcDCCSpeed);
   float DCCinc = (REGSpeed + DCCSpeed) / DCCStep;
   DCCSpeed = REGSpeed;
-
-
-
 
   ///// DRIVE MOTORS /////
   while (J1cur < J1step || J2cur < J2step || J3cur < J3step || J4cur < J4step || J5cur < J5step || J6cur < J6step || TRcur < TRstep)
@@ -497,11 +489,11 @@ void driveMotorsJ(String inData) {
     {
       J1_PE = (HighStep / J1step);
       ///find left over 1
-      J1_LO_1 = (HighStep - (J1step * J1_PE));
+      J1_LO_1 = (HighStep - (J1step * J1_PE)); // residuo de  (HighStep / J1step)
       ///find skip 1
       if (J1_LO_1 > 0)
       {
-        J1_SE_1 = (HighStep / J1_LO_1);
+        J1_SE_1 = (HighStep / J1_LO_1); // cociente entero
       }
       else
       {
@@ -509,7 +501,7 @@ void driveMotorsJ(String inData) {
       }
       ///find left over 2
       if (J1_SE_1 > 0)
-      {
+      { //(1-e)*J1_LO_1, "e" siempre menor que 1, e=(HighStep- J1_LO_1)/HighStep
         J1_LO_2 = HighStep - ((J1step * J1_PE) + ((J1step * J1_PE) / J1_SE_1));
       }
       else
@@ -981,11 +973,8 @@ void driveMotorsJ(String inData) {
       }
     }
 
-
     // inc cur step
     highStepCur = ++highStepCur;
-
-
   }
 }
 
@@ -993,7 +982,8 @@ void driveMotorsJ(String inData) {
 //DRIVE MOTORS L
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void driveMotorsL(String inData) {
+void driveMotorsL(String inData)
+{
   int J1start = inData.indexOf('A');
   int J2start = inData.indexOf('B');
   int J3start = inData.indexOf('C');
@@ -1034,7 +1024,6 @@ void driveMotorsL(String inData) {
   int J5cur = 0;
   int J6cur = 0;
   int TRcur = 0;
-
 
   //SET DIRECTIONS
 
@@ -1164,14 +1153,12 @@ void driveMotorsL(String inData) {
     digitalWrite(TRdirPin, LOW);
   }
 
-
   /////CALC SPEEDS//////
   float AdjSpeed = (SpeedIn / 100);
   //REG SPEED
   float LspeedAdj = 2;
   float CalcRegSpeed = ((SpeedMult * LspeedAdj) / AdjSpeed);
-  int curDelay = int(CalcRegSpeed)/6;
-
+  int curDelay = int(CalcRegSpeed) / 6;
 
   ///// DRIVE MOTORS /////
   while (J1cur < J1step || J2cur < J2step || J3cur < J3step || J4cur < J4step || J5cur < J5step || J6cur < J6step || TRcur < TRstep)
@@ -1233,12 +1220,12 @@ void driveMotorsL(String inData) {
   }
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //MAIN
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void setup() {
+void setup()
+{
   // run once:
   Serial.begin(115200);
 
@@ -1332,11 +1319,10 @@ void setup() {
   digitalWrite(J4stepPin, HIGH);
   digitalWrite(J5stepPin, HIGH);
   digitalWrite(J6stepPin, HIGH);
-
 }
 
-
-void loop() {
+void loop()
+{
 
   //test led
   if (digitalRead(J1calPin) == HIGH || digitalRead(J2calPin) == HIGH || digitalRead(J3calPin) == HIGH || digitalRead(J4calPin) == HIGH || digitalRead(J5calPin) == HIGH || digitalRead(J6calPin) == HIGH)
@@ -1408,7 +1394,7 @@ void loop() {
       {
         int WTstart = inData.indexOf('S');
         float WaitTime = inData.substring(WTstart + 1).toFloat();
-        int WaitTimeMS = WaitTime*1000;
+        int WaitTimeMS = WaitTime * 1000;
         delay(WaitTimeMS);
         Serial.print("Done");
       }
@@ -1453,7 +1439,8 @@ void loop() {
       {
         int WIstart = inData.indexOf('N');
         int InputNum = inData.substring(WIstart + 1).toInt();
-        while (digitalRead(InputNum) == LOW) {
+        while (digitalRead(InputNum) == LOW)
+        {
           delay(100);
         }
         Serial.print("Done");
@@ -1467,7 +1454,8 @@ void loop() {
 
         //String InputStr =  String("Input" + InputNum);
         //uint8_t Input = atoi(InputStr.c_str ());
-        while (digitalRead(InputNum) == HIGH) {
+        while (digitalRead(InputNum) == HIGH)
+        {
           delay(100);
         }
         Serial.print("Done");
@@ -1507,7 +1495,6 @@ void loop() {
         ///
         float SpeedIn = inData.substring(SPstart + 1).toFloat();
 
-
         //RESET COUNTERS
         int J1done = 0;
         int J2done = 0;
@@ -1520,86 +1507,110 @@ void loop() {
 
         //SET DIRECTIONS
         // J1 //
-        if (J1rotdir == 1 && J1caldir == 1) {
+        if (J1rotdir == 1 && J1caldir == 1)
+        {
           digitalWrite(J1dirPin, LOW);
         }
-        else if (J1rotdir == 0 && J1caldir == 1) {
+        else if (J1rotdir == 0 && J1caldir == 1)
+        {
           digitalWrite(J1dirPin, HIGH);
         }
-        else if (J1rotdir == 1 && J1caldir == 0) {
+        else if (J1rotdir == 1 && J1caldir == 0)
+        {
           digitalWrite(J1dirPin, HIGH);
         }
-        else if (J1rotdir == 0 && J1caldir == 0) {
+        else if (J1rotdir == 0 && J1caldir == 0)
+        {
           digitalWrite(J1dirPin, LOW);
         }
 
         // J2 //
-        if (J2rotdir == 1 && J2caldir == 1) {
+        if (J2rotdir == 1 && J2caldir == 1)
+        {
           digitalWrite(J2dirPin, LOW);
         }
-        else if (J2rotdir == 0 && J2caldir == 1) {
+        else if (J2rotdir == 0 && J2caldir == 1)
+        {
           digitalWrite(J2dirPin, HIGH);
         }
-        else if (J2rotdir == 1 && J2caldir == 0) {
+        else if (J2rotdir == 1 && J2caldir == 0)
+        {
           digitalWrite(J2dirPin, HIGH);
         }
-        else if (J2rotdir == 0 && J2caldir == 0) {
+        else if (J2rotdir == 0 && J2caldir == 0)
+        {
           digitalWrite(J2dirPin, LOW);
         }
 
         // J3 //
-        if (J3rotdir == 1 && J3caldir == 1) {
+        if (J3rotdir == 1 && J3caldir == 1)
+        {
           digitalWrite(J3dirPin, LOW);
         }
-        else if (J3rotdir == 0 && J3caldir == 1) {
+        else if (J3rotdir == 0 && J3caldir == 1)
+        {
           digitalWrite(J3dirPin, HIGH);
         }
-        else if (J3rotdir == 1 && J3caldir == 0) {
+        else if (J3rotdir == 1 && J3caldir == 0)
+        {
           digitalWrite(J3dirPin, HIGH);
         }
-        else if (J3rotdir == 0 && J3caldir == 0) {
+        else if (J3rotdir == 0 && J3caldir == 0)
+        {
           digitalWrite(J3dirPin, LOW);
         }
 
         // J4 //
-        if (J4rotdir == 1 && J4caldir == 1) {
+        if (J4rotdir == 1 && J4caldir == 1)
+        {
           digitalWrite(J4dirPin, LOW);
         }
-        else if (J4rotdir == 0 && J4caldir == 1) {
+        else if (J4rotdir == 0 && J4caldir == 1)
+        {
           digitalWrite(J4dirPin, HIGH);
         }
-        else if (J4rotdir == 1 && J4caldir == 0) {
+        else if (J4rotdir == 1 && J4caldir == 0)
+        {
           digitalWrite(J4dirPin, HIGH);
         }
-        else if (J4rotdir == 0 && J4caldir == 0) {
+        else if (J4rotdir == 0 && J4caldir == 0)
+        {
           digitalWrite(J4dirPin, LOW);
         }
 
         // J5 //
-        if (J5rotdir == 1 && J5caldir == 1) {
+        if (J5rotdir == 1 && J5caldir == 1)
+        {
           digitalWrite(J5dirPin, LOW);
         }
-        else if (J5rotdir == 0 && J5caldir == 1) {
+        else if (J5rotdir == 0 && J5caldir == 1)
+        {
           digitalWrite(J5dirPin, HIGH);
         }
-        else if (J5rotdir == 1 && J5caldir == 0) {
+        else if (J5rotdir == 1 && J5caldir == 0)
+        {
           digitalWrite(J5dirPin, HIGH);
         }
-        else if (J5rotdir == 0 && J5caldir == 0) {
+        else if (J5rotdir == 0 && J5caldir == 0)
+        {
           digitalWrite(J5dirPin, LOW);
         }
 
         // J6 //
-        if (J6rotdir == 1 && J6caldir == 1) {
+        if (J6rotdir == 1 && J6caldir == 1)
+        {
           digitalWrite(J6dirPin, LOW);
         }
-        else if (J6rotdir == 0 && J6caldir == 1) {
+        else if (J6rotdir == 0 && J6caldir == 1)
+        {
           digitalWrite(J6dirPin, HIGH);
         }
-        else if (J6rotdir == 1 && J6caldir == 0) {
+        else if (J6rotdir == 1 && J6caldir == 0)
+        {
           digitalWrite(J6dirPin, HIGH);
         }
-        else if (J6rotdir == 0 && J6caldir == 0) {
+        else if (J6rotdir == 0 && J6caldir == 0)
+        {
           digitalWrite(J6dirPin, LOW);
         }
 
@@ -1662,7 +1673,8 @@ void loop() {
           if (J5done < J5step && (digitalRead(J5calPin) == LOW))
           {
             digitalWrite(J5stepPin, HIGH);
-            J5done = ++J5done;;
+            J5done = ++J5done;
+            ;
           }
           delayMicroseconds(5);
           if (J6done < J6step && (digitalRead(J6calPin) == LOW))
@@ -1746,33 +1758,45 @@ void loop() {
         int J5pass = 1;
         int J6pass = 1;
         ///
-        if (J1step > 0) {
-          if (digitalRead(J1calPin) == LOW) {
+        if (J1step > 0)
+        {
+          if (digitalRead(J1calPin) == LOW)
+          {
             J1pass = 0;
           }
         }
-        if (J2step > 0) {
-          if (digitalRead(J2calPin) == LOW) {
+        if (J2step > 0)
+        {
+          if (digitalRead(J2calPin) == LOW)
+          {
             J2pass = 0;
           }
         }
-        if (J3step > 0) {
-          if (digitalRead(J3calPin) == LOW) {
+        if (J3step > 0)
+        {
+          if (digitalRead(J3calPin) == LOW)
+          {
             J3pass = 0;
           }
         }
-        if (J4step > 0) {
-          if (digitalRead(J4calPin) == LOW) {
+        if (J4step > 0)
+        {
+          if (digitalRead(J4calPin) == LOW)
+          {
             J4pass = 0;
           }
         }
         if (J5step > 0)
-        { if (digitalRead(J5calPin) == LOW) {
+        {
+          if (digitalRead(J5calPin) == LOW)
+          {
             J5pass = 0;
           }
         }
         if (J6step > 0)
-        { if (digitalRead(J6calPin) == LOW) {
+        {
+          if (digitalRead(J6calPin) == LOW)
+          {
             J6pass = 0;
           }
         }
@@ -1787,8 +1811,6 @@ void loop() {
         inData = ""; // Clear recieved buffer
       }
 
-
-
       //----- MOVE J ---------------------------------------------------
       //-----------------------------------------------------------------------
       if (function == "MJ")
@@ -1798,7 +1820,6 @@ void loop() {
         inData = ""; // Clear recieved buffer
         ////////MOVE COMPLETE///////////
       }
-
 
       //----- MOVE L ---------------------------------------------------
       //-----------------------------------------------------------------------
@@ -1811,11 +1832,14 @@ void loop() {
         inData = ""; // Clear recieved buffer
         //STORE WAYPOINTS
         int i = 0;
-        while (i < WayPts) {
-          while (Serial.available() > 0) {
+        while (i < WayPts)
+        {
+          while (Serial.available() > 0)
+          {
             char recieved = Serial.read();
             inData += recieved;
-            if (recieved == '\n') {
+            if (recieved == '\n')
+            {
               inData.toCharArray(WayPt[i], 50);
               Serial.print(i);
               ++i;
@@ -1826,7 +1850,8 @@ void loop() {
         Serial.print("waypts done");
         //EXECUTE WAYPOINTS
         i = 0;
-        while (i < WayPts + 1) {
+        while (i < WayPts + 1)
+        {
           inData = WayPt[i];
           driveMotorsL(inData);
           ++i;
