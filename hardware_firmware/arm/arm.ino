@@ -18,6 +18,7 @@
 void setup()
 {
     wdt_disable();
+    init_robot_pins();
     read_eeprom();
     Serial.begin(115200);  //Iniciando puerto serial
     Serial.setTimeout(50); // ms de tiempo de corte y espera a la comunicación

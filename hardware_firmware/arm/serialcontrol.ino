@@ -2,7 +2,8 @@
 void send_status()
 {
     data_send = String("{") +
-                String("'m0':") + String(m0_step) +
+                String("'st':") + String(status) +
+                String(",") + String("'m0':") + String(m0_step) +
                 String(",") + String("'m1':") + String(m1_step) +
                 String(",") + String("'m2':") + String(m2_step) +
                 String(",") + String("'m3':") + String(m3_step) +

@@ -2,7 +2,7 @@
 Adafruit_PWMServoDriver servo_pwm = Adafruit_PWMServoDriver();
 String inData;
 String data_send;
-
+String status;
 // Variables donde se almacenarán los conteos de paso de cada motor
 // los conteos inician en la posición home, conteo = 0
 unsigned long m0_step; // contadores
@@ -72,10 +72,10 @@ const LIMmotor limmotor;
 // FInales de carrera en pullup
 struct PINfc
 {
-    byte fc1 = 3;
-    byte fc2 = 4;
-    byte fc3 = 5;
-    byte fc4 = 6;
+    byte fc01 = 3; //cw
+    byte fc02 = 4; //ccw
+    byte fc11 = 5; //cw
+    byte fc12 = 6; //ccw
 };
 const PINfc pinfc;
 /**------------------- Dirección de losmotores en CW  --------------**/
@@ -89,3 +89,12 @@ struct CWdir
     byte j3 = 1;
 };
 const CWdir cwdir;
+/**------------------- Estado del movimiento de los CW  --------------**/
+struct CWst
+{
+    bool j0 = true;
+    bool j1 = true;
+    bool j2 = true;
+    bool j3 = true;
+};
+CWst cwst;

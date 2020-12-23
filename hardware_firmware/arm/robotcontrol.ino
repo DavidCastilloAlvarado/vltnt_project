@@ -1,6 +1,6 @@
 /** 
  * control_arm = {"A": None, "B": None,
-               "C": None, "D": None, "P": None, "R": None, "S": None}
+               "C": None, "D": None, "Y": None, "P": None, "S": None}
 **/
 
 void robot_command(String &inData)
@@ -48,15 +48,16 @@ void robot_command(String &inData)
     {
         Jactive = ++Jactive;
     }
-    // Seteando la dirección deseada de movimiento (Por practicidad se setean todos los motores)
-    set_direction(J0dir, cwdir.j0, pimmotor.m0_dir);
-    set_direction(J1dir, cwdir.j1, pimmotor.m1_dir);
-    set_direction(J2dir, cwdir.j2, pimmotor.m2_dir);
-    set_direction(J3dir, cwdir.j3, pimmotor.m3_dir);
+    // Seteando la dirección deseada de movimiento según la conexión y posición de los motores físicos.
+    set_direction(J0dir, cwdir.j0, pimmotor.m0_dir, cwst.j0);
+    set_direction(J1dir, cwdir.j1, pimmotor.m1_dir, cwst.j1);
+    set_direction(J2dir, cwdir.j2, pimmotor.m2_dir, cwst.j2);
+    set_direction(J3dir, cwdir.j3, pimmotor.m3_dir, cwst.j3);
 
     // Creando las variables aux
     // creando el delay para el accionamiento de los motores
     float curDelay = (CalcDCCSpeed / Jactive);
+    /*-----------------------J0-----------------------*/
     // calculados
     int J0_PE = 0;
     int J0_SE_1 = 0;
@@ -68,6 +69,7 @@ void robot_command(String &inData)
     int J0_PEcur = 0;
     int J0_SE_1cur = 0;
     int J0_SE_2cur = 0;
+    /*-----------------------J1-----------------------*/
     // Calculados
     int J1_PE = 0;
     int J1_SE_1 = 0;
@@ -79,33 +81,55 @@ void robot_command(String &inData)
     int J1_PEcur = 0;
     int J1_SE_1cur = 0;
     int J1_SE_2cur = 0;
-    // Extras para motores no cinematicos de posicion
+    /*-----------------------EXTRAS-----------------------*/
+    // Extras para motores no cinematicos
     int J2cur = 0;
     int J3cur = 0;
+    bool passLim = true;
+    bool Fail = false;
     //Calcular variables aux para realizar el movimiento total conjunto.
     calc_aux_values(J0_PE, J0_SE_1, J0_LO_1, J0_SE_2, J0_LO_2, HighStep, J0step);
     calc_aux_values(J1_PE, J1_SE_1, J1_LO_1, J1_SE_2, J1_LO_2, HighStep, J1step);
 
     // Movimiento de motores para el posicionamiento
-    while (J1cur < J1step || J0cur < J0step)
+    while (J0cur < J0step || J1cur < J1step && passLim && (Fail == false))
     {
         if (J0cur < J0step)
         {
-            Jmove(pimmotor.m0_step, curDelay, J0_PE, J0_SE_1, J0_LO_1, J0_SE_2, J0_LO_2, J0cur, J0_PEcur, J0_SE_1cur, J0_SE_2cur);
+            if (read_fc_limits(pinfc.fc01, pinfc.fc02, cwst.j0, passLim) and fail_status(Fail) == false)
+            {
+                Jmove(pimmotor.m0_step, curDelay, J0_PE, J0_SE_1, J0_LO_1, J0_SE_2, J0_LO_2, J0cur, J0_PEcur, J0_SE_1cur, J0_SE_2cur);
+            }
+            else
+            {
+                break;
+            }
         }
         if (J1cur < J1step)
         {
-            Jmove(pimmotor.m1_step, curDelay, J1_PE, J1_SE_1, J1_LO_1, J1_SE_2, J1_LO_2, J1cur, J1_PEcur, J1_SE_1cur, J1_SE_2cur);
+            if (read_fc_limits(pinfc.fc11, pinfc.fc12, cwst.j1, passLim) and fail_status(Fail) == false)
+            {
+                Jmove(pimmotor.m1_step, curDelay, J1_PE, J1_SE_1, J1_LO_1, J1_SE_2, J1_LO_2, J1cur, J1_PEcur, J1_SE_1cur, J1_SE_2cur);
+            }
+            else
+            {
+                break;
+            }
         }
-        if (J2cur < J2step)
+    }
+    while (J3cur < J3step || J2cur < J2step)
+    {
+        if (J2cur < J2step and fail_status(Fail) == false)
         {
             stepper_move(pimmotor.m2_step, curDelay, J2cur);
         }
-        if (J3cur < J3step)
+        if (J3cur < J3step and fail_status(Fail) == false)
         {
             stepper_move(pimmotor.m3_step, curDelay, J3cur);
         }
     }
+    status = passLim ? "ok" : "fcLim";
+    status = Fail ? "Failmotor" : status;
 }
 
 void home_position()
@@ -114,6 +138,40 @@ void home_position()
 
 void servo_move()
 {
+}
+
+bool read_fc_limits(byte fc1, byte fc2, bool cw_state, bool &pass)
+{
+    // se genera el error cuando la dirección de movimiento es en dirección(CW) del final de carrera activado
+    if (digitalRead(fc1) and cw_state == true)
+    {
+        pass = false;
+        return pass;
+    }
+    // se genera el error cuando la dirección de movimiento es en dirección(CCW) del final de carrera activado
+    else if (digitalRead(fc2) and (cw_state == false))
+    {
+        pass = false;
+        return pass;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+bool fail_status(bool &fail)
+{
+    if (digitalRead(pimmotor.m3_fault) || digitalRead(pimmotor.m2_fault) || digitalRead(pimmotor.m1_fault) || digitalRead(pimmotor.m0_fault))
+    {
+        fail = true;
+        return fail;
+    }
+    else
+    {
+        fail = false;
+        return fail;
+    }
 }
 
 void Jmove(int jxstepPIN, float curDelay, int Jx_PE, int Jx_SE_1, int Jx_LO_1, int Jx_SE_2, int Jx_LO_2, int &Jxcur, int &Jx_PEcur, int &Jx_SE_1cur, int &Jx_SE_2cur)
@@ -158,7 +216,7 @@ void stepper_move(int jxstepPIN, float curDelay, int &Jxcur)
     digitalWrite(jxstepPIN, HIGH);
 }
 
-void set_direction(byte Jxdir, byte Jxrotdir, byte JxPin)
+void set_direction(byte Jxdir, byte Jxrotdir, byte JxPin, bool &cw)
 { /*
 Jxdir: dirección enviada como comando
 Jxrotdir: dirección cw seteada en este firmware 0 o 1
@@ -167,18 +225,22 @@ jxPin: que pin corresponde dir pin steppermotor
     /////// Jx /////////
     if (Jxdir == 1 && Jxrotdir == 1)
     {
+        cw = true;
         digitalWrite(JxPin, LOW);
     }
     else if (Jxdir == 1 && Jxrotdir == 0)
     {
+        cw = false;
         digitalWrite(JxPin, HIGH);
     }
     else if (Jxdir == 0 && Jxrotdir == 1)
     {
+        cw = false;
         digitalWrite(JxPin, HIGH);
     }
     else if (Jxdir == 0 && Jxrotdir == 0)
     {
+        cw = true;
         digitalWrite(JxPin, LOW);
     }
 }
@@ -215,4 +277,39 @@ void calc_aux_values(int &Jx_PE, int &Jx_SE_1, int &Jx_LO_1, int &Jx_SE_2, int &
     {
         Jx_SE_2 = 0;
     }
+}
+
+void init_robot_pins()
+{
+    // iniciando los pines de los finales de carrera
+    pinMode(pinfc.fc01, INPUT_PULLUP);
+    pinMode(pinfc.fc02, INPUT_PULLUP);
+    pinMode(pinfc.fc11, INPUT_PULLUP);
+    pinMode(pinfc.fc11, INPUT_PULLUP);
+
+    //iniciando los pines relacionados al control de los motores
+    digitalWrite(pimmotor.rst_all, LOW);
+    pinMode(pimmotor.rst_all, OUTPUT);
+
+    pinMode(pimmotor.m0_step, OUTPUT);
+    pinMode(pimmotor.m0_dir, OUTPUT);
+    pinMode(pimmotor.m0_fault, INPUT_PULLUP);
+
+    pinMode(pimmotor.m1_step, OUTPUT);
+    pinMode(pimmotor.m1_dir, OUTPUT);
+    pinMode(pimmotor.m1_fault, INPUT_PULLUP);
+
+    pinMode(pimmotor.m2_step, OUTPUT);
+    pinMode(pimmotor.m2_dir, OUTPUT);
+    pinMode(pimmotor.m2_fault, INPUT_PULLUP);
+
+    pinMode(pimmotor.m3_step, OUTPUT);
+    pinMode(pimmotor.m3_dir, OUTPUT);
+    pinMode(pimmotor.m3_fault, INPUT_PULLUP);
+
+    // Seteando los motor_step en high(se están usando optoacopladores que invierten el comportamiento)
+    digitalWrite(pimmotor.m0_step, HIGH);
+    digitalWrite(pimmotor.m1_step, HIGH);
+    digitalWrite(pimmotor.m2_step, HIGH);
+    digitalWrite(pimmotor.m3_step, HIGH);
 }
