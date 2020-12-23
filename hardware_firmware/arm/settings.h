@@ -1,5 +1,6 @@
 // Variables de comunicación del robot
-Adafruit_PWMServoDriver servo_pwm = Adafruit_PWMServoDriver();
+Adafruit_PWMServoDriver servopwm = Adafruit_PWMServoDriver();
+byte FREQ = 60;
 String inData;
 String data_send;
 String status;
@@ -64,8 +65,11 @@ struct LIMmotor
     unsigned long m3_min = 0;
     unsigned long m3_max = 5000;
 
-    unsigned long sv1p = 900; // representan al slot que ocuparan en la placa PCA9685
-    unsigned long sv2p = 900; // hasta 4096, usando el servodriver PCA9685
+    unsigned long sv1pmin = 150; // representan al slot que ocuparan en la placa PCA9685
+    unsigned long sv1pmax = 600;
+
+    unsigned long sv2pmin = 150; // hasta 4096, usando el servodriver PCA9685
+    unsigned long sv2pmax = 600;
 };
 const LIMmotor limmotor;
 /**------------------- PINES Finales de carrera  --------------**/

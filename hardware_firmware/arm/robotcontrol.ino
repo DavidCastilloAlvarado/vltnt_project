@@ -96,7 +96,7 @@ void robot_command(String &inData)
     {
         if (J0cur < J0step)
         {
-            if (read_fc_limits(pinfc.fc01, pinfc.fc02, cwst.j0, passLim) and fail_status(Fail) == false)
+            if (read_fc_limits(pinfc.fc01, pinfc.fc02, cwst.j0, passLim) && (fail_status(Fail) == false))
             {
                 Jmove(pimmotor.m0_step, curDelay, J0_PE, J0_SE_1, J0_LO_1, J0_SE_2, J0_LO_2, J0cur, J0_PEcur, J0_SE_1cur, J0_SE_2cur);
             }
@@ -107,7 +107,7 @@ void robot_command(String &inData)
         }
         if (J1cur < J1step)
         {
-            if (read_fc_limits(pinfc.fc11, pinfc.fc12, cwst.j1, passLim) and fail_status(Fail) == false)
+            if (read_fc_limits(pinfc.fc11, pinfc.fc12, cwst.j1, passLim) && (fail_status(Fail) == false))
             {
                 Jmove(pimmotor.m1_step, curDelay, J1_PE, J1_SE_1, J1_LO_1, J1_SE_2, J1_LO_2, J1cur, J1_PEcur, J1_SE_1cur, J1_SE_2cur);
             }
@@ -119,25 +119,88 @@ void robot_command(String &inData)
     }
     while (J3cur < J3step || J2cur < J2step)
     {
-        if (J2cur < J2step and fail_status(Fail) == false)
+        if (J2cur < J2step)
         {
+            if (fail_status(Fail))
+            {
+                break;
+            }
             stepper_move(pimmotor.m2_step, curDelay, J2cur);
         }
-        if (J3cur < J3step and fail_status(Fail) == false)
+        if (J3cur < J3step)
         {
+            if (fail_status(Fail))
+            {
+                break;
+            }
             stepper_move(pimmotor.m3_step, curDelay, J3cur);
         }
     }
     status = passLim ? "ok" : "fcLim";
     status = Fail ? "Failmotor" : status;
+
+    // Movimiento de los servos
+    servo_move(sv1pos, sv2pos);
 }
 
 void home_position()
 {
+    set_direction(1, cwdir.j0, pimmotor.m0_dir, cwst.j0); // mover en CCW
+    set_direction(0, cwdir.j1, pimmotor.m1_dir, cwst.j1); // mover en CW
+    bool passLim_0 = true;
+    bool passLim_1 = true;
+    bool Fail = false;
+    int J0cur = 0;
+    int J1cur = 0;
+    float curDelay = 300 / 2;
+    while (passLim_0 || passLim_1) // va ha parar el movimiento cuando se active el final de carrera
+    {
+        wdt_reset();
+        if (read_fc_limits(pinfc.fc01, pinfc.fc02, cwst.j0, passLim_0))
+        {
+            if (fail_status(Fail))
+            {
+                break;
+            }
+            stepper_move(pimmotor.m0_step, curDelay, J0cur);
+        }
+
+        if (read_fc_limits(pinfc.fc11, pinfc.fc12, cwst.j1, passLim_1))
+        {
+            if (fail_status(Fail))
+            {
+                break;
+            }
+            stepper_move(pimmotor.m1_step, curDelay, J1cur);
+        }
+    }
+
+    status = passLim_0 && passLim_1 ? "ok" : "fcLim";
+    status = Fail ? "Failmotor" : status;
 }
 
-void servo_move()
+void servo_move(int servo1pos, int servo2pos)
 {
+    ////// Servo 1 /////
+    if (servo1pos > limmotor.sv1pmax)
+    {
+        servo1pos = limmotor.sv1pmax;
+    }
+    else if (servo1pos < limmotor.sv1pmin)
+    {
+        servo1pos = limmotor.sv1pmin;
+    }
+    servopwm.setPWM(pimmotor.sv1p, 0, servo1pos);
+    ////// Servo 2 //////
+    if (servo2pos > limmotor.sv2pmax)
+    {
+        servo2pos = limmotor.sv2pmax;
+    }
+    else if (servo2pos < limmotor.sv2pmin)
+    {
+        servo2pos = limmotor.sv2pmin;
+    }
+    servopwm.setPWM(pimmotor.sv2p, 0, servo2pos);
 }
 
 bool read_fc_limits(byte fc1, byte fc2, bool cw_state, bool &pass)
@@ -230,7 +293,7 @@ jxPin: que pin corresponde dir pin steppermotor
     }
     else if (Jxdir == 1 && Jxrotdir == 0)
     {
-        cw = false;
+        cw = true;
         digitalWrite(JxPin, HIGH);
     }
     else if (Jxdir == 0 && Jxrotdir == 1)
@@ -240,7 +303,7 @@ jxPin: que pin corresponde dir pin steppermotor
     }
     else if (Jxdir == 0 && Jxrotdir == 0)
     {
-        cw = true;
+        cw = false;
         digitalWrite(JxPin, LOW);
     }
 }
@@ -312,4 +375,9 @@ void init_robot_pins()
     digitalWrite(pimmotor.m1_step, HIGH);
     digitalWrite(pimmotor.m2_step, HIGH);
     digitalWrite(pimmotor.m3_step, HIGH);
+}
+
+void init_servos()
+{
+    servopwm.setPWMFreq(FREQ);
 }

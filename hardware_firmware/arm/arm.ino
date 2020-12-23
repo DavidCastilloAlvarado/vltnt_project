@@ -3,7 +3,7 @@
  * TEMA: Firmware desarrollado para el control de movimiento del manipulador robótico, perteneciente al
  * proyecto VLTNT, el cual es un robot integrado que se desplaza en el plano mediante 
  * ruedas de oruga y que ademas posee un manipulador robotico de 4 grados de libertad
- * OPERACACION: El firmware trabaja en conjunto con el software del API REST creado para
+ * OPERACION: El firmware trabaja en conjunto con el software del API REST creado para
  * controlar las funcionalidades del robot.
  * INPUTS: Las ordenes para el movimiento de los motores llegan desde el API. Este API maneja una
  * objeto creado para controlar la cinemática del robot, es ella quien maneja laas cinemáticas. 
@@ -20,6 +20,8 @@ void setup()
     wdt_disable();
     init_robot_pins();
     read_eeprom();
+    init_servos();
+
     Serial.begin(115200);  //Iniciando puerto serial
     Serial.setTimeout(50); // ms de tiempo de corte y espera a la comunicación
     inData.reserve(100);

@@ -15,17 +15,23 @@ void send_status()
 
 void response_order(int order)
 {
-    if (order == 0)
+    if (order == 0) // Llamar al nombre del robot
     {
         Serial.println("{'name':\"arm\"}");
     }
-    else if (order == 1)
+    else if (order == 1) // LLamar al estado del robot
     {
         send_status();
     }
-    else if (order == 2)
+    else if (order == 2) // LLamar a la posicion home
     {
         home_position();
+    }
+    else if (order == 3) // Reset motor drivers
+    {
+        digitalWrite(pimmotor.rst_all, HIGH);
+        delay(100);
+        digitalWrite(pimmotor.rst_all, LOW);
     }
 }
 
