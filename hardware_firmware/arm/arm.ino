@@ -11,6 +11,7 @@
  * de movimiento de angularidad traducidos a pasos y dirección de giro.
  * **/
 #include <avr/wdt.h>
+#include <Wire.h>
 #include <EEPROM.h>
 #include <Adafruit_PWMServoDriver.h>
 #include "settings.h"
@@ -18,12 +19,13 @@
 void setup()
 {
     wdt_disable();
+    Serial.begin(115200);  //Iniciando puerto serial
+    Serial.setTimeout(50); // ms de tiempo de corte y espera a la comunicación
+
     init_robot_pins();
     read_eeprom();
     init_servos();
 
-    Serial.begin(115200);  //Iniciando puerto serial
-    Serial.setTimeout(50); // ms de tiempo de corte y espera a la comunicación
     inData.reserve(100);
     data_send.reserve(100);
     wdt_enable(WDTO_1S); // Iniciando el WDT

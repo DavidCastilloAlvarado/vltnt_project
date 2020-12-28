@@ -33,6 +33,10 @@ void response_order(int order)
         delay(100);
         digitalWrite(pimmotor.rst_all, LOW);
     }
+    else if (order == 4)
+    {
+        fc_status();
+    }
 }
 
 void serialEvent()

@@ -1,6 +1,6 @@
 // Variables de comunicación del robot
 Adafruit_PWMServoDriver servopwm = Adafruit_PWMServoDriver();
-byte FREQ = 60;
+int FREQ_ = 50;
 String inData;
 String data_send;
 String status;
@@ -13,7 +13,7 @@ unsigned long m3_step;
 unsigned long sv1_ang; // almacenadores de PWM duty service
 unsigned long sv2_ang;
 // Velocidad del movimiento de los motores en ms
-int SpeedMult = 200; // aumentar para hacer un movimiento aún más suave
+float SpeedMult = 500.0; // aumentar para hacer un movimiento aún más suave, no reducir por debajo de 225, el driver no responderá a tal velocidad
 // posicion en la memoria EEPROM DEL VALOR DE CADA CONTADOR Y DUTY CYCLE
 struct POSmemo
 {
@@ -46,8 +46,8 @@ struct PINmotor
     byte m3_dir = 11;
     byte m3_fault = 8;
 
-    byte sv1p = 1; // representan al slot que ocuparan en la placa PCA9685
-    byte sv2p = 2;
+    int sv1p = 0; // representan al slot que ocuparan en la placa PCA9685
+    int sv2p = 1;
 };
 const PINmotor pimmotor;
 /**------------------- Limites StepperMotor y servos --------------**/
@@ -65,11 +65,11 @@ struct LIMmotor
     unsigned long m3_min = 0;
     unsigned long m3_max = 5000;
 
-    unsigned long sv1pmin = 150; // representan al slot que ocuparan en la placa PCA9685
-    unsigned long sv1pmax = 600;
+    unsigned long sv1pmin = 80; // representan al slot que ocuparan en la placa PCA9685
+    unsigned long sv1pmax = 440;
 
-    unsigned long sv2pmin = 150; // hasta 4096, usando el servodriver PCA9685
-    unsigned long sv2pmax = 600;
+    unsigned long sv2pmin = 80; // hasta 4096, usando el servodriver PCA9685
+    unsigned long sv2pmax = 440;
 };
 const LIMmotor limmotor;
 /**------------------- PINES Finales de carrera  --------------**/

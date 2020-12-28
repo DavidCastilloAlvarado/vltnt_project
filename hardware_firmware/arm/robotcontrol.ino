@@ -29,7 +29,7 @@ void robot_command(String &inData)
     int SpeedIn = inData.substring(SPEEDstart + 1).toInt();
 
     // Calculo de la velocidad
-    float AdjSpeed = (SpeedIn / 100);
+    float AdjSpeed = (SpeedIn / 100.0);
     float CalcDCCSpeed = (SpeedMult / AdjSpeed);
 
     // Encontrando el maximo paso a desplazar
@@ -56,7 +56,7 @@ void robot_command(String &inData)
 
     // Creando las variables aux
     // creando el delay para el accionamiento de los motores
-    float curDelay = (CalcDCCSpeed / Jactive);
+    float curDelay = (CalcDCCSpeed / (Jactive)*1.0);
     /*-----------------------J0-----------------------*/
     // calculados
     int J0_PE = 0;
@@ -92,6 +92,9 @@ void robot_command(String &inData)
     calc_aux_values(J1_PE, J1_SE_1, J1_LO_1, J1_SE_2, J1_LO_2, HighStep, J1step);
 
     // Movimiento de motores para el posicionamiento
+    Serial.print(Jactive);
+    Serial.print(" ");
+    Serial.println(curDelay);
     while (J0cur < J0step || J1cur < J1step && passLim && (Fail == false))
     {
         if (J0cur < J0step)
@@ -116,7 +119,12 @@ void robot_command(String &inData)
                 break;
             }
         }
+        wdt_reset(); // reset watch dog
+        // Establecer tiempo de espera en caso solo se cuente con un único motor activado
+        // Jactive == 1 ? delayMicroseconds(curDelay) : delayMicroseconds(0);
     }
+    // El motor que controla el gripper tiene mucha perdida por lo que necesita más torque para ser movido
+    curDelay = curDelay < 500 ? 500 : curDelay;
     while (J3cur < J3step || J2cur < J2step)
     {
         if (J2cur < J2step)
@@ -135,12 +143,15 @@ void robot_command(String &inData)
             }
             stepper_move(pimmotor.m3_step, curDelay, J3cur);
         }
+        wdt_reset(); // reset watch dog
     }
     status = passLim ? "ok" : "fcLim";
     status = Fail ? "Failmotor" : status;
 
     // Movimiento de los servos
     servo_move(sv1pos, sv2pos);
+
+    send_status();
 }
 
 void home_position()
@@ -179,7 +190,7 @@ void home_position()
     status = Fail ? "Failmotor" : status;
 }
 
-void servo_move(int servo1pos, int servo2pos)
+void servo_move(float servo1pos, float servo2pos)
 {
     ////// Servo 1 /////
     if (servo1pos > limmotor.sv1pmax)
@@ -206,13 +217,13 @@ void servo_move(int servo1pos, int servo2pos)
 bool read_fc_limits(byte fc1, byte fc2, bool cw_state, bool &pass)
 {
     // se genera el error cuando la dirección de movimiento es en dirección(CW) del final de carrera activado
-    if (digitalRead(fc1) and cw_state == true)
+    if (digitalRead(fc1) == 0 and cw_state == true)
     {
         pass = false;
         return pass;
     }
     // se genera el error cuando la dirección de movimiento es en dirección(CCW) del final de carrera activado
-    else if (digitalRead(fc2) and (cw_state == false))
+    else if (digitalRead(fc2) == 0 and (cw_state == false))
     {
         pass = false;
         return pass;
@@ -239,6 +250,7 @@ bool fail_status(bool &fail)
 
 void Jmove(int jxstepPIN, float curDelay, int Jx_PE, int Jx_SE_1, int Jx_LO_1, int Jx_SE_2, int Jx_LO_2, int &Jxcur, int &Jx_PEcur, int &Jx_SE_1cur, int &Jx_SE_2cur)
 {
+    // Serial.println(jxstepPIN);
     if (Jx_SE_2 == 0)
     {
         Jx_SE_2cur = (Jx_SE_2 + 1);
@@ -277,6 +289,7 @@ void stepper_move(int jxstepPIN, float curDelay, int &Jxcur)
     digitalWrite(jxstepPIN, LOW);
     delayMicroseconds(curDelay);
     digitalWrite(jxstepPIN, HIGH);
+    delayMicroseconds(250.0); // delay de espera para la siguiente instrucción
 }
 
 void set_direction(byte Jxdir, byte Jxrotdir, byte JxPin, bool &cw)
@@ -348,7 +361,7 @@ void init_robot_pins()
     pinMode(pinfc.fc01, INPUT_PULLUP);
     pinMode(pinfc.fc02, INPUT_PULLUP);
     pinMode(pinfc.fc11, INPUT_PULLUP);
-    pinMode(pinfc.fc11, INPUT_PULLUP);
+    pinMode(pinfc.fc12, INPUT_PULLUP);
 
     //iniciando los pines relacionados al control de los motores
     digitalWrite(pimmotor.rst_all, LOW);
@@ -379,5 +392,19 @@ void init_robot_pins()
 
 void init_servos()
 {
-    servopwm.setPWMFreq(FREQ);
+    servopwm.begin();
+    servopwm.setPWMFreq(FREQ_);
+}
+
+void fc_status()
+{
+    bool fc01 = digitalRead(pinfc.fc01);
+    bool fc02 = digitalRead(pinfc.fc02);
+    bool fc11 = digitalRead(pinfc.fc11);
+    bool fc12 = digitalRead(pinfc.fc12);
+    Serial.println("{" + String(fc01) + String(" ") +
+                   String(fc02) + String(" ") +
+                   String(fc11) + String(" ") +
+                   String(fc12) + String(" ") +
+                   "}");
 }
