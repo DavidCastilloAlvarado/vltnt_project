@@ -13,7 +13,7 @@ unsigned long m3_step;
 unsigned long sv1_ang; // almacenadores de PWM duty service
 unsigned long sv2_ang;
 // Velocidad del movimiento de los motores en ms
-float SpeedMult = 500.0; // aumentar para hacer un movimiento aún más suave, no reducir por debajo de 225, el driver no responderá a tal velocidad
+float SpeedMult = 3000.0; // aumentar para hacer un movimiento aún más suave, no reducir por debajo de 225, el driver no responderá a tal velocidad
 // posicion en la memoria EEPROM DEL VALOR DE CADA CONTADOR Y DUTY CYCLE
 struct POSmemo
 {

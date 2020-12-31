@@ -121,7 +121,7 @@ void robot_command(String &inData)
         }
         wdt_reset(); // reset watch dog
         // Establecer tiempo de espera en caso solo se cuente con un único motor activado
-        // Jactive == 1 ? delayMicroseconds(curDelay) : delayMicroseconds(0);
+        Jactive == 1 ? delayMicroseconds(curDelay) : delayMicroseconds(0);
     }
     // El motor que controla el gripper tiene mucha perdida por lo que necesita más torque para ser movido
     curDelay = curDelay < 500 ? 500 : curDelay;
@@ -289,7 +289,7 @@ void stepper_move(int jxstepPIN, float curDelay, int &Jxcur)
     digitalWrite(jxstepPIN, LOW);
     delayMicroseconds(curDelay);
     digitalWrite(jxstepPIN, HIGH);
-    delayMicroseconds(250.0); // delay de espera para la siguiente instrucción
+    // delayMicroseconds(250.0); // delay de espera para la siguiente instrucción
 }
 
 void set_direction(byte Jxdir, byte Jxrotdir, byte JxPin, bool &cw)
